@@ -1,0 +1,8 @@
+on:
+  push:
+    branches-ignore:
+      - master
+
+jobs:
+  test:
+    uses: alexandermendes/workflows/.github/workflows/test-js-package.yml@master

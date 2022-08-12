@@ -1,0 +1,15 @@
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    uses: alexandermendes/workflows/.github/workflows/test-js-package.yml@master
+
+  release:
+    needs: test
+    uses: alexandermendes/workflows/.github/workflows/release-js-package.yml@master
+    secrets:
+      SEMANTIC_RELEASE_GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_GITHUB_TOKEN }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

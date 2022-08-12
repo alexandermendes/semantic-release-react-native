@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "sourceMap": true,
+    "strict": true,
+    "target": "es6",
+    "removeComments": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "jsx": "react",
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules"]
+}

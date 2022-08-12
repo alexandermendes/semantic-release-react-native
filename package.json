@@ -1,0 +1,52 @@
+{
+  "name": "semantic-release-react-native",
+  "version": "1.0.1",
+  "description": "Semantic Release plugin for versioning React Native applications.",
+  "author": "Alex Mendes",
+  "license": "ISC",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -d",
+    "prebuild": "rimraf dist",
+    "test": "jest",
+    "lint": "eslint .",
+    "format": "prettier --config .prettierrc '**/*.ts' --write",
+    "prepublishOnly": "yarn build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexandermendes/semantic-release-react-native.git"
+  },
+  "homepage": "https://github.com/alexandermendes/semantic-release-react-native#readme",
+  "bugs": {
+    "url": "https://github.com/alexandermendes/semantic-release-react-native/issues"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "devDependencies": {
+    "@commitlint/config-conventional": "^16.0.0",
+    "@semantic-release/changelog": "^6.0.1",
+    "@semantic-release/git": "^10.0.1",
+    "@types/jest": "^27.4.0",
+    "@typescript-eslint/eslint-plugin": "^5.11.0",
+    "@typescript-eslint/parser": "^5.11.0",
+    "commitlint": "^8.3.5",
+    "eslint": "^8.8.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-jest": "^26.0.0",
+    "husky": "^4.2.5",
+    "jest": "^27.5.1",
+    "prettier": "^2.3.2",
+    "rimraf": "^3.0.2",
+    "semantic-release": "^19.0.2",
+    "ts-jest": "^27.0.4",
+    "typescript": "^4.3.5"
+  }
+}

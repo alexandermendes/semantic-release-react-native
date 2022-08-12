@@ -1,0 +1,18 @@
+# Logs
+*.log
+
+# Packages
+node_modules/
+*.tgz
+
+# Build
+dist/
+
+# Coverage
+coverage/
+
+# IDE
+.idea/
+
+# System
+.DS_Store
