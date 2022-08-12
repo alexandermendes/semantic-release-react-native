@@ -30,8 +30,11 @@ The plugin can be configured in the [Semantic Release configuration file](https:
 
 ## Configuration
 
-| Property               | Description                                   |
-|------------------------|-----------------------------------------------|
-| `androidPath`          | Path to your "android/app/build.gradle" file. |
-| `incrementBuildNumber` | Increment the build number by one.            |
-| `skipAndroid`          | Skip Android versioning.                      |
+| Property               | Description                                        | Default                    |
+|------------------------|----------------------------------------------------|----------------------------|
+| `androidPath`          | Path to your "android/app/build.gradle" file.      | `android/app/build.gradle` |
+| `iosPath`              | Path to your "ios/" folder.                        | `ios`                      |
+| `skipBuildNumber`      | Do not increment the build number.                 | `false`                    |
+| `skipAndroid`          | Skip Android versioning.                           | `false`                    |
+| `skipIos`              | Skip iOS versioning.                               | `false`                    |
+| `iosPackageName`       | Only update iOS projects that have the given name. | `undefined`                |
