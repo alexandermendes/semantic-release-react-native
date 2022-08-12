@@ -78,4 +78,15 @@ describe('Android', () => {
     expect(logger.error).toHaveBeenCalledTimes(1);
     expect(logger.error).toHaveBeenCalledWith(`No file found at ${defaultAndroidPath}`);
   });
+
+  it('updates to a prerelease version', async () => {
+    const context = createContext({ version: '1.2.3-beta.1' });
+
+    await publish({ skipIos: true }, context);
+
+    expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+      'versionName "1.2.3-beta.1"',
+      'versionCode 101',
+    ].join('\n'));
+  });
 });
