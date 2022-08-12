@@ -25,9 +25,21 @@ The plugin can be configured in the [Semantic Release configuration file](https:
   "plugins": [
     "@semantic-release/commit-analyzer",
     "semantic-release-react-native",
+    [
+      "@semantic-release/git",
+      {
+        "assets": [
+          "ios/**/Info.plist",
+          "ios/**/*.pbxproj",
+          "android/app/build.gradle",
+        ],
+      },
+    ],
   ]
 }
 ```
+
+The example configuration above will version and git commit your native files.
 
 ## Configuration
 
