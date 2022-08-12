@@ -6,6 +6,7 @@ import type { Context } from 'semantic-release';
 type PluginConfig = {
   androidPath: string;
   incrementBuildNumber?: boolean;
+  skipAndroid?: boolean;
 };
 
 type PluginContext = Context & {
@@ -89,7 +90,9 @@ export const generateNotes = async (
   const { version } = nextRelease;
   const basePath = appRoot.path ? path.resolve(cwd, appRoot.path) : cwd;
 
-  versionAndroid(version, pluginConfig, context);
+  if (!pluginConfig.skipAndroid) {
+    versionAndroid(version, pluginConfig, context);
+  }
 
   console.log(basePath, cwd);
 };

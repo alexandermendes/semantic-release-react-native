@@ -34,3 +34,4 @@ The plugin can be configured in the [Semantic Release configuration file](https:
 |------------------------|-----------------------------------------------|
 | `androidPath`          | Path to your "android/app/build.gradle" file. |
 | `incrementBuildNumber` | Increment the build number by one.            |
+| `skipAndroid`          | Skip Android versioning.                      |
