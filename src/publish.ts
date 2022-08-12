@@ -1,5 +1,4 @@
 import fs from 'fs';
-import appRoot from 'app-root-path';
 import path from 'path';
 import plist, { PlistObject, PlistValue } from 'plist';
 import semver from 'semver';
@@ -7,41 +6,25 @@ import { Xcode } from 'pbxproj-dom/xcode';
 import unique from 'lodash.uniq';
 import flattenDeep from 'lodash.flattendeep';
 import type { Context } from 'semantic-release';
-
-export type PluginConfig = {
-  androidPath?: string;
-  iosPath?: string;
-  iosPackageName?: string;
-  skipBuildNumber?: boolean;
-  skipAndroid?: boolean;
-  skipIos?: boolean;
-};
-
-/**
- * Get an absolute path.
- *
- * Uses the base path of the repo if the given path is not already absolute.
- */
-const toAbsolutePath = (filePath: string, basePath: string) => (path.isAbsolute(filePath)
-  ? filePath
-  : path.join(basePath, filePath));
+import type { PluginConfig } from './types';
+import { toAbsolutePath } from './paths';
 
 /**
  * Get the path to the Android bundle.gradle file.
  */
-const getAndroidPath = (basePath: string, androidPath?: string) => {
+const getAndroidPath = (androidPath?: string) => {
   const defaultAndroidPath = path.join('android', 'app', 'build.gradle');
 
-  return toAbsolutePath(androidPath ?? defaultAndroidPath, basePath);
+  return toAbsolutePath(androidPath ?? defaultAndroidPath);
 };
 
 /**
  * Get the path to the iOS Xcode project file.
  */
-const getIosPath = (basePath: string, iosPath?: string) => {
+const getIosPath = (iosPath?: string) => {
   const defaultIosPath = path.join('ios');
 
-  return toAbsolutePath(iosPath ?? defaultIosPath, basePath);
+  return toAbsolutePath(iosPath ?? defaultIosPath);
 };
 
 /**
@@ -73,7 +56,7 @@ const versionAndroid = (
 
   logger.info('Versioning Android');
 
-  const androidPath = getAndroidPath(appRoot.path, pluginConfig.androidPath);
+  const androidPath = getAndroidPath(pluginConfig.androidPath);
 
   if (!fs.existsSync(androidPath)) {
     logger.error(`No file found at ${androidPath}`);
@@ -229,7 +212,7 @@ const versionIos = (
 
   logger.info('Versioning iOS');
 
-  const iosPath = getIosPath(appRoot.path, pluginConfig.iosPath);
+  const iosPath = getIosPath(pluginConfig.iosPath);
 
   const xcodeProjects = fs
     .readdirSync(iosPath)
