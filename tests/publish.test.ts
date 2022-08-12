@@ -27,17 +27,19 @@ const createContext = ({
 const defaultAndroidPath = `${appRoot.path}/android/app/build.gradle`;
 const defaultIosPath = `${appRoot.path}/ios`;
 
+const getBuildSetting = jest.fn((value: string) => ({
+  INFOPLIST_FILE: { text: 'Test/Info.plist' },
+  CURRENT_PROJECT_VERSION: { text: 1 },
+}[value]));
+
 const buildConfig = {
   ast: {
     value: {
-      get: (valueA: string) => ({
+      get: (value: string) => ({
         buildSettings: {
-          get: (valueB: string) => ({
-            INFOPLIST_FILE: { text: 'Test/Info.plist' },
-            CURRENT_PROJECT_VERSION: { text: 1 },
-          }[valueB]),
+          get: getBuildSetting,
         },
-      }[valueA]),
+      }[value]),
     },
   },
   patch: jest.fn(),
@@ -257,6 +259,18 @@ describe('Publish', () => {
         CFBundleShortVersionString: '1.2.3',
         CFBundleVersion: '100',
       });
+    });
+
+    it('skips any project.pbxproj files with a missing CURRENT_PROJECT_VERSION', async () => {
+      getBuildSetting.mockImplementation((value: string) => ({
+        INFOPLIST_FILE: { text: 'Test/Info.plist' },
+      }[value]));
+
+      const context = createContext();
+
+      await publish({ skipAndroid: true, skipBuildNumber: true }, context);
+
+      expect(buildConfig.patch).not.toHaveBeenCalled();
     });
 
     it('logs an error if no xcodeproj was found', async () => {
