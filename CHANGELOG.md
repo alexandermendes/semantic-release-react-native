@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.0.1...v1.1.0) (2022-08-12)
+
+
+### Features
+
+* add verifyConditions step for paths ([53425c4](https://github.com/alexandermendes/semantic-release-react-native/commit/53425c4fe6294c95650ffb96da770ceae445c59e))
+
 ## [1.0.1](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.0.0...v1.0.1) (2022-08-12)
 
 
