@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.0.0...v1.0.1) (2022-08-12)
+
+
+### Bug Fixes
+
+* remove invalid cwd context option ([7ea6586](https://github.com/alexandermendes/semantic-release-react-native/commit/7ea6586dfa0bf2dc398a8167b42dcd27a31360b5))
+
 # 1.0.0 (2022-08-12)
 
 
