@@ -51,8 +51,8 @@ The example configuration above will version and git commit your native files.
 | `skipAndroid`     | Skip Android versioning.                                           | `false`                    |
 | `skipIos`         | Skip iOS versioning.                                               | `false`                    |
 | `iosPackageName`  | Only update iOS projects that have the given name.                 | `null`                     |
-| `noPrerelease`    | Strip pre-release labels from versions for both platforms.         | `false`                    |
-| `versionStrategy` | Specifies the versioning strategies for each platform (see below). | `{"android": "increment", "ios": "strict"}` |
+| `noPrerelease`    | Skip pre-release versions entirely for both platforms.             | `false`                    |
+| `versionStrategy` | Specifies the versioning strategies for each platform (see below). | `{"android": {"buildNumber": "increment", "preRelease": "semantic"}, "ios": {"buildNumber": "strict", "preRelease": "strict"}}` |
 
 ## Versioning strategies
 
@@ -70,15 +70,15 @@ versioned in an entirely different way, or if you just have a different personal
 preference. In order to provide suitable flexibility various alternative
 strategies are available for each platform.
 
-**Example**
+**Example (defaults shown)**
 
 ```json
 {
   "plugins": [
     ["semantic-release-react-native", {
       "versionStrategy": {
-        "android": { "buildNumber": "semantic" },
-        "ios": { "buildNumber": "increment" }
+        "android": { "buildNumber": "increment" },
+        "ios": { "buildNumber": "strict" }
       }
     }],
   ]
@@ -187,15 +187,42 @@ Disable updates of the `CFBundleVersion`.
 ## Pre-releases
 
 Pre-release versions present no major challenges for Android, but iOS again gets
-a little more complicated.
+a little more complicated. So, we again provide a few strategies for handling
+these across platforms.
 
-If you want to opt out of the behaviour described below and strip pre-releases
-for both Android and iOS you can use the `noPrerelease` option.
+**Example (defaults shown)**
+
+```json
+{
+  "plugins": [
+    ["semantic-release-react-native", {
+      "versionStrategy": {
+        "android": { "preRelease": "semantic" },
+        "ios": { "preRelease": "strict" }
+      }
+    }],
+  ]
+}
+```
 
 ### Android
 
 For Android, it is fine to use pre-release versions such as `1.2.3-beta.1`
 as the `vesionName`.
+
+#### `semantic`
+
+This is the default strategy for this platform.
+
+It uses the semantic version including the pre-release as normal.
+
+#### `short`
+
+This strategy behaves the same as the `short` strategy for iOS.
+
+#### `ignore`
+
+Ignore pre-release versions entirely.
 
 ### iOS
 
@@ -204,18 +231,24 @@ property [does not support pre-release versions](https://developer.apple.com/lib
 so this plugin will be strip and pre-release labels from the version set against
 this property (e.g. `1.2.3-beta.1` becomes `1.2.3`).
 
-However, the `CFBundleVersion` [does seem to have some provision for specifying
+However, the `CFBundleVersion` [does have some provision for specifying
 pre-release versions](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html#//apple_ref/doc/uid/20001431-102364), in that
 it allows a character in the set [**abdf**] followed by a number between 1 and 255
 to be set as a suffix after the version number.
 
-This plugin makes use of this feature in an attempt to help identify
-pre-release versions when you upload your app via App Store Connect. It does
-this by taking the first character of your pre-release label and, if that character
-is one of those in the allowed character set, uses that as the suffix along with
-the pre-release version. If the character is not one of those in the allowed set
-we fall back to the letter `f`. For example, if the next bundle version is
-`1000.1.1` then:
+#### `short`
+
+This is the default strategy for this platform.
+
+It makes use of the `CFBundleVersion` in an attempt to help identify
+pre-release versions when you upload your app via App Store Connect, while still
+complying with the documented guidelines.
+
+It does this by taking the first character of your pre-release label and, if that
+character is one of those in the allowed character set, uses that as the suffix
+along with the pre-release version. If the character is not one of those in the
+allowed set we fall back to the letter `f`. For example, if the next bundle
+version is `1000.1.1` then:
 
 - `1.2.3-alpha.1` > `1000.1.1a1`
 - `1.2.3-beta.3` > `1000.1.1b3`
@@ -224,6 +257,10 @@ we fall back to the letter `f`. For example, if the next bundle version is
 
 Note that this feature only works when using the `strict` versioning strategy
 for iOS (which is the default).
+
+#### `ignore`
+
+Ignore pre-release versions entirely.
 
 ## Xcode project files
 
