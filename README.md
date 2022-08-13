@@ -64,15 +64,11 @@ release.
 For build numbers the differences between the platforms make things a little more
 complicated.
 
-#### Android
-
 For Android, the `versionCode` is an integer that must be incremented with every
 version of the app that you plan to release. To keep things simple this plugin
 auto-increments the current `versionCode` by one for every release. The maximum
 value currently allowed by the Google Play Store is 2100000000, so there should
 be plenty of room here for even the most productive of developers.
-
-#### iOS
 
 For iOS, there is a lot of conflicting information around what constitutes a
 technically correct `CFBundleVersion`. The general consensus seems to be that it
@@ -90,3 +86,42 @@ Apple's (rather ambiguous) rules this plugin will auto-increment the
 - `1000.1.1` > `1000.1.2`
 - `1000.1.99` > `1000.2.1`
 - `1000.99.99` > `1001.1.1`
+
+Note that if your current `CFBundleVersion` is already greater that 9999 then,
+according to the documentation above it is already invalid anyway, so we will
+just keep incrementing it following the pattern described here and hopefully
+Apple won't complain!
+
+### Pre-releases
+
+For Android, pre-release versions set against the `vesionName` are fine
+(e.g. `1.2.3-beta.1`).
+
+For iOS, the `CFBundleShortVersionString`
+property [does not support pre-release versions](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html#//apple_ref/doc/uid/20001431-111349),
+so these will be stripped from the version set against this property in
+your `Info.plist` file (e.g. `1.2.3-beta.1` becomes `1.2.3`).
+
+However, the `CFBundleVersion` [does seem to have some provision for specifying
+pre-release versions](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html#//apple_ref/doc/uid/20001431-102364), in that
+it allows a character in the set [abdf] followed by a number between 1 and 255
+to be set as a suffix after the version number.
+
+This plugin will make use of this feature in an attempt to help identify
+pre-release versions when you upload your app to the stores. It does this by
+taking the first character of your pre-release label and if that character is
+one of those in the allowed set using that as the suffix along with the pre-release
+version. If the character is not one of those in the allowed set we fall back to
+`f`. For example, if the next bundle version is `1000.1.1` then:
+
+by taking the first character of your pre-release version, followed by the
+pre-release version number. For example, if the next semantic version is
+`1.2.3-beta.1` then:
+
+- `1.2.3-alpha.1` > `1000.1.1a1`
+- `1.2.3-beta.3` > `1000.1.1b3`
+- `1.2.3-feature.42` > `1000.1.1f42`
+- `1.2.3-hello.1` > `1000.1.1f1`
+
+If you want to opt out of this behaviour and strip pre-releases for both
+Android and iOS you can use the `noPrerelease` option.

@@ -310,7 +310,7 @@ describe('Publish', () => {
       ${'0.0.1'}       | ${'1.1.1'}
       ${'100.100.100'} | ${'101.1.1'}
     `(
-      'sets the versionCode to $expectedVersion from $previousVersion',
+      'sets the CFBundleVersion to $expectedVersion from $previousVersion',
       async ({ previousVersion, expectedVersion }) => {
         const context = createContext();
 
@@ -323,6 +323,32 @@ describe('Publish', () => {
         expect(plist.build).toHaveBeenCalledTimes(1);
         expect((plist.build as jest.Mock).mock.calls[0][0].CFBundleVersion).toBe(
           expectedVersion,
+        );
+      },
+    );
+
+    it.only.each`
+      version               | previousBundleVersion | expectedBundleVersion
+      ${'1.2.3-alpha.1'}    | ${'1.1.1'}            | ${'1.1.2a1'}
+      ${'1.2.3-beta.3'}     | ${'1.1.1'}            | ${'1.1.2b3'}
+      ${'1.2.3-feature.42'} | ${'1.1.1'}            | ${'1.1.2f42'}
+      ${'1.2.3-hello.12'}   | ${'1.1.1'}            | ${'1.1.2f12'}
+      ${'1.2.3-alpha.2'}    | ${'1.1.1a1'}          | ${'1.1.2a2'}
+      ${'1.2.3-beta.1'}     | ${'1.1.1a1'}          | ${'1.1.2b1'}
+    `(
+      'sets the CFBundleVersion to $expectedBundleVersion for version $version',
+      async ({ version, previousBundleVersion, expectedBundleVersion }) => {
+        const context = createContext({ version });
+
+        (plist.parse as jest.Mock).mockReturnValue({
+          CFBundleVersion: previousBundleVersion,
+        });
+
+        await publish({ skipAndroid: true }, context);
+
+        expect(plist.build).toHaveBeenCalledTimes(1);
+        expect((plist.build as jest.Mock).mock.calls[0][0].CFBundleVersion).toBe(
+          expectedBundleVersion,
         );
       },
     );

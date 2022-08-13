@@ -45,11 +45,11 @@ const stripPrereleaseVersion = (version: string) => {
 /**
  * Get a build number for iOS.
  */
-const getCfBundleVersion = (buildNumber: string) => {
-  const [majorStr, minorStr, patchStr] = buildNumber.split('.');
-  let major = Number(majorStr ?? 0);
-  let minor = Number(minorStr ?? 0);
-  let patch = Number(patchStr ?? 0);
+const getCfBundleVersion = (previousBundleVersion: string, version: string) => {
+  const [majorStr, minorStr, patchStr] = previousBundleVersion.split('.');
+  let major = parseInt(majorStr ?? 0, 10);
+  let minor = parseInt(minorStr ?? 0, 10);
+  let patch = parseInt(patchStr ?? 0, 10);
 
   let versioned = false;
 
@@ -80,7 +80,24 @@ const getCfBundleVersion = (buildNumber: string) => {
     patch += 1;
   }
 
-  return `${major}.${minor}.${patch}`;
+  let bundleVersion = `${major}.${minor}.${patch}`;
+
+  const preReleaseLabel = version.split('-');
+
+  if (!preReleaseLabel) {
+    return bundleVersion;
+  }
+
+  const preReleaseChar = preReleaseLabel[1][0];
+  const validPreReleaseChar = ['a', 'b', 'd', 'f'].includes(preReleaseChar)
+    ? preReleaseChar
+    : 'f';
+
+  const preReleaseVersion = parseInt(preReleaseLabel[1]?.split('.')[1] ?? 0, 10);
+
+  bundleVersion += `${validPreReleaseChar}${preReleaseVersion}`;
+
+  return bundleVersion;
 };
 
 /**
@@ -231,7 +248,7 @@ const incrementPlistVersions = (
       const newBuildVersion = String(plistObj.CFBundleVersion);
 
       Object.assign(plistObj, {
-        CFBundleVersion: getCfBundleVersion(newBuildVersion),
+        CFBundleVersion: getCfBundleVersion(newBuildVersion, version),
       });
 
       logger.success(`iOS ${plistFilename} CFBundleVersion > ${newBuildVersion}`);
