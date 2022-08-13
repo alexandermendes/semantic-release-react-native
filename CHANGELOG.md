@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.6.0...v1.6.1) (2022-08-13)
+
+
+### Bug Fixes
+
+* add validation for version strategies ([5702b8e](https://github.com/alexandermendes/semantic-release-react-native/commit/5702b8e926fcbe7c652e7011a35b38179db7abc5))
+
 # [1.6.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.5.0...v1.6.0) (2022-08-13)
 
 
