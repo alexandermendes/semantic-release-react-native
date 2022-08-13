@@ -152,6 +152,21 @@ describe('Publish', () => {
       expect(fs.writeFileSync).not.toHaveBeenCalled();
     });
 
+    it('skips a prerelease version if the ignore strategy is being used', async () => {
+      const context = createContext({ version: '1.2.3-beta.1' });
+
+      await publish({
+        skipIos: true,
+        versionStrategy: {
+          android: {
+            preRelease: 'ignore',
+          },
+        },
+      }, context);
+
+      expect(fs.writeFileSync).not.toHaveBeenCalled();
+    });
+
     it('loads a build.gradle from a custom path', async () => {
       const context = createContext();
       const androidPath = 'src/android/build.gradle';
@@ -996,6 +1011,22 @@ describe('Publish', () => {
           CURRENT_PROJECT_VERSION: '1.2.3',
         },
       });
+    });
+
+    it('skips a prerelease version if the ignore strategy is being used', async () => {
+      const context = createContext({ version: '1.2.3-beta.1' });
+
+      await publish({
+        skipAndroid: true,
+        versionStrategy: {
+          ios: {
+            preRelease: 'ignore',
+          },
+        },
+      }, context);
+
+      expect(plist.build).not.toHaveBeenCalled();
+      expect(buildConfig.patch).not.toHaveBeenCalled();
     });
   });
 });

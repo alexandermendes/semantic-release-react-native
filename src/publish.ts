@@ -1,6 +1,5 @@
 import type { Context } from 'semantic-release';
 import deepmerge from 'deepmerge';
-import semver from 'semver';
 import type { FullPluginConfig, PluginConfig } from './types';
 import { versionAndroid } from './version/android';
 import { versionIos } from './version/ios';
