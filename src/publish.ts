@@ -43,6 +43,47 @@ const stripPrereleaseVersion = (version: string) => {
 };
 
 /**
+ * Get a build number for iOS.
+ */
+const getCfBundleVersion = (buildNumber: string) => {
+  const [majorStr, minorStr, patchStr] = buildNumber.split('.');
+  let major = Number(majorStr ?? 0);
+  let minor = Number(minorStr ?? 0);
+  let patch = Number(patchStr ?? 0);
+
+  let versioned = false;
+
+  if (patch >= 99) {
+    minor += 1;
+    patch = 1;
+    versioned = true;
+  }
+
+  if (minor >= 99) {
+    major += 1;
+    minor = 1;
+    patch = 1;
+    versioned = true;
+  }
+
+  if (!major) {
+    major += 1;
+    versioned = true;
+  }
+
+  if (!minor) {
+    minor += 1;
+    versioned = true;
+  }
+
+  if (!versioned || !patch) {
+    patch += 1;
+  }
+
+  return `${major}.${minor}.${patch}`;
+};
+
+/**
  * Update Android files with the new version.
  *
  * @see https://developer.android.com/studio/publish/versioning
@@ -187,10 +228,10 @@ const incrementPlistVersions = (
     logger.success(`iOS ${plistFilename} CFBundleShortVersionString > ${shortVersion}`);
 
     if (!pluginConfig.skipBuildNumber && plistObj.CFBundleVersion) {
-      const newBuildVersion = String(parseInt(String(plistObj.CFBundleVersion), 10) + 1);
+      const newBuildVersion = String(plistObj.CFBundleVersion);
 
       Object.assign(plistObj, {
-        CFBundleVersion: newBuildVersion,
+        CFBundleVersion: getCfBundleVersion(newBuildVersion),
       });
 
       logger.success(`iOS ${plistFilename} CFBundleVersion > ${newBuildVersion}`);

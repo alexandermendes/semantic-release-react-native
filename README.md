@@ -53,17 +53,40 @@ The example configuration above will version and git commit your native files.
 | `iosPackageName`       | Only update iOS projects that have the given name.        | `undefined`                |
 | `noPrerelease`         | Strip pre-release labels from versions for both platfoms. | `undefined`                |
 
-## Versioning behaviour
+## Versioning strategies
 
-By default this plugin will set the `vesionName` for Android and the `CFBundleShortVersionString`
-for iOS to the version defined as the next semantic release.
+By default this plugin will set the `vesionName` for Android and the
+`CFBundleShortVersionString` for iOS to the version defined as the next semantic
+release.
 
-### Pre-releases
+### Build numbers
 
-For Android, pre-release version against the `vesionName` are fine (e.g. `1.2.3-beta.1`).
+For build numbers the differences between the platforms make things a little more
+complicated.
 
-For iOS, the `CFBundleShortVersionString` property does not support pre-release
-versions, so these will be stripped from the version set in your
-`Info.plist` file (e.g. `1.2.3-beta.1` becomes `1.2.3`).
+#### Android
 
-If you want to normalise this behaviour you can use the `noPrerelease` option.
+For Android, the `versionCode` is an integer that must be incremented with every
+version of the app that you plan to release. To keep things simple this plugin
+auto-increments the current `versionCode` by one for every release. The maximum
+value currently allowed by the Google Play Store is 2100000000, so there should
+be plenty of room here for even the most productive of developers.
+
+#### iOS
+
+For iOS, there is a lot of conflicting information around what constitutes a
+technically correct `CFBundleVersion`. The general consensus seems to be that it
+should be a string comprised of three non-negative, period-separated integers.
+So, it may seem that using the semantic version here would make sense, except
+that [some of Apple's documentation](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html#//apple_ref/doc/uid/20001431-102364)
+mentions that what would be the MINOR and PATCH parts of the semantic version
+are limited to two digits, which could be quite restrictive for projects that
+do not generate a lot of breaking changes (i.e. `v1.100.1` would be invalid).
+
+So, for the purpose as allowing as many increments as possible and not breaking
+Apple's (rather ambiguous) rules this plugin will auto-increment the
+`CFBundleVersion` in the format `xxxx.xx.xx`, for example:
+
+- `1000.1.1` > `1000.1.2`
+- `1000.1.99` > `1000.2.1`
+- `1000.99.99` > `1001.1.1`

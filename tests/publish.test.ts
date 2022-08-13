@@ -297,5 +297,34 @@ describe('Publish', () => {
         `No Xcode project file found at ${defaultIosPath}`,
       );
     });
+
+    it.only.each`
+      previousVersion  | expectedVersion
+      ${'1'}           | ${'1.1.1'}
+      ${'1000'}        | ${'1000.1.1'}
+      ${'1000.1'}      | ${'1000.1.1'}
+      ${'1000.1.1'}    | ${'1000.1.2'}
+      ${'1000.1.99'}   | ${'1000.2.1'}
+      ${'1000.99.99'}  | ${'1001.1.1'}
+      ${'12345'}       | ${'12345.1.1'}
+      ${'0.0.1'}       | ${'1.1.1'}
+      ${'100.100.100'} | ${'101.1.1'}
+    `(
+      'sets the versionCode to $expectedVersion from $previousVersion',
+      async ({ previousVersion, expectedVersion }) => {
+        const context = createContext();
+
+        (plist.parse as jest.Mock).mockReturnValue({
+          CFBundleVersion: previousVersion,
+        });
+
+        await publish({ skipAndroid: true }, context);
+
+        expect(plist.build).toHaveBeenCalledTimes(1);
+        expect((plist.build as jest.Mock).mock.calls[0][0].CFBundleVersion).toBe(
+          expectedVersion,
+        );
+      },
+    );
   });
 });
