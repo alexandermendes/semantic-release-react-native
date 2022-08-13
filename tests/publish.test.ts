@@ -243,7 +243,7 @@ describe('Publish', () => {
       );
     });
 
-    it('ignores the CFBundleVersion if it does not exist', async () => {
+    it('starts CFBundleVersion from 1.1.1 if it does not exist', async () => {
       (plist.parse as jest.Mock).mockReturnValue({
         CFBundleDisplayName: 'My App',
       });
@@ -256,6 +256,7 @@ describe('Publish', () => {
       expect(plist.build).toHaveBeenCalledWith({
         CFBundleDisplayName: 'My App',
         CFBundleShortVersionString: '1.2.3',
+        CFBundleVersion: '1.1.1',
       });
     });
 

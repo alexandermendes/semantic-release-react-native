@@ -51,6 +51,10 @@ const getCfBundleVersion = (previousBundleVersion: string, version: string) => {
   let minor = parseInt(minorStr ?? 0, 10);
   let patch = parseInt(patchStr ?? 0, 10);
 
+  if (!previousBundleVersion) {
+    return '1.1.1';
+  }
+
   let versioned = false;
 
   if (patch >= 99) {
@@ -213,13 +217,16 @@ const isPlistObject = (value: PlistValue): value is PlistObject => (
   typeof (value as PlistObject) === 'object'
 );
 
+/**
+ * Update the CFBundleVersion property.
+ */
 const updateCfBundleVersion = (
   plistFilename: string,
   plistObj: PlistObject,
   version: string,
   logger: Context['logger'],
 ) => {
-  const currentBuildVersion = String(plistObj.CFBundleVersion);
+  const currentBuildVersion = plistObj.CFBundleVersion ? String(plistObj.CFBundleVersion) : '';
   const newBuildVersion = getCfBundleVersion(currentBuildVersion, version);
 
   if (currentBuildVersion.startsWith('$(')) {
@@ -235,6 +242,24 @@ const updateCfBundleVersion = (
   });
 
   logger.success(`iOS ${plistFilename} CFBundleVersion > ${newBuildVersion}`);
+};
+
+/**
+ * Update the CFBundleShortVersionString property.
+ */
+const updateCfBundleShortVersion = (
+  plistFilename: string,
+  plistObj: PlistObject,
+  version: string,
+  logger: Context['logger'],
+) => {
+  const shortVersion = stripPrereleaseVersion(version);
+
+  Object.assign(plistObj, {
+    CFBundleShortVersionString: shortVersion,
+  });
+
+  logger.success(`iOS ${plistFilename} CFBundleShortVersionString > ${shortVersion}`);
 };
 
 /**
@@ -260,15 +285,9 @@ const incrementPlistVersions = (
       return;
     }
 
-    const shortVersion = stripPrereleaseVersion(version);
+    updateCfBundleShortVersion(plistFilename, plistObj, version, logger);
 
-    Object.assign(plistObj, {
-      CFBundleShortVersionString: shortVersion,
-    });
-
-    logger.success(`iOS ${plistFilename} CFBundleShortVersionString > ${shortVersion}`);
-
-    if (!pluginConfig.skipBuildNumber && plistObj.CFBundleVersion) {
+    if (!pluginConfig.skipBuildNumber) {
       updateCfBundleVersion(plistFilename, plistObj, version, logger);
     }
 
