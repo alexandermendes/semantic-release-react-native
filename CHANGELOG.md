@@ -1,3 +1,12 @@
+## [1.3.4](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.3.3...v1.3.4) (2022-08-13)
+
+
+### Bug Fixes
+
+* bring CURRENT_PROJECT_VERSION and MARKETING_VERSION inline ([eb2ce47](https://github.com/alexandermendes/semantic-release-react-native/commit/eb2ce4799724a467ef36578a447054637957ef2f))
+* leave $(CURRENT_PROJECT_VERSION) alone ([1e45d08](https://github.com/alexandermendes/semantic-release-react-native/commit/1e45d086873ab3a9267478b0ac14a3f0b5e5e648))
+* start CFBundleVersion from 1.1.1 if it does not exist ([ede25a2](https://github.com/alexandermendes/semantic-release-react-native/commit/ede25a25687b482c1ec8db41716a598aec0d6781))
+
 ## [1.3.3](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.3.2...v1.3.3) (2022-08-13)
 
 
