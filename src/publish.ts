@@ -245,10 +245,11 @@ const incrementPlistVersions = (
     logger.success(`iOS ${plistFilename} CFBundleShortVersionString > ${shortVersion}`);
 
     if (!pluginConfig.skipBuildNumber && plistObj.CFBundleVersion) {
-      const newBuildVersion = String(plistObj.CFBundleVersion);
+      const currentBuildVersion = String(plistObj.CFBundleVersion);
+      const newBuildVersion = getCfBundleVersion(currentBuildVersion, version);
 
       Object.assign(plistObj, {
-        CFBundleVersion: getCfBundleVersion(newBuildVersion, version),
+        CFBundleVersion: newBuildVersion,
       });
 
       logger.success(`iOS ${plistFilename} CFBundleVersion > ${newBuildVersion}`);
