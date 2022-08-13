@@ -1,3 +1,16 @@
+# [1.6.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.5.0...v1.6.0) (2022-08-13)
+
+
+### Bug Fixes
+
+* only allow pre-releases for ios in strict mode ([0fa4c8d](https://github.com/alexandermendes/semantic-release-react-native/commit/0fa4c8da132f87f650ead8f9afadd17c1e61563b))
+
+
+### Features
+
+* add ignore pre-release strategy ([0f28cce](https://github.com/alexandermendes/semantic-release-react-native/commit/0f28cce530b2df4fa25cfdfe7f7990ba5def8025))
+* skip prereleases entirely if noPrerelease given ([c9dbfcf](https://github.com/alexandermendes/semantic-release-react-native/commit/c9dbfcf6228feb6ae733ca386d7a2d1f9cbe3052))
+
 # [1.5.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.4.1...v1.5.0) (2022-08-13)
 
 
