@@ -88,7 +88,7 @@ export const versionAndroid = (
 
   if (
     isPreRelease(nextRelease)
-    && pluginConfig.versionStrategy.android?.preRelease === 'ignore'
+    && pluginConfig.versionStrategy.android?.preRelease === false
   ) {
     logger.info('Skipping pre-release version for Android');
 

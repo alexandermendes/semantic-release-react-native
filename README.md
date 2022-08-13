@@ -187,8 +187,9 @@ Disable updates of the `CFBundleVersion`.
 ## Pre-releases
 
 Pre-release versions present no major challenges for Android, but iOS again gets
-a little more complicated. So, we again provide a few strategies for handling
-these across platforms.
+a little more complicated. We provide a versioning strategy that will work for
+each platform, or you can choose to ignore pre-releases entirely for a particular
+platform by setting `versionStrategy.<platform>.preRelease` to `false`.
 
 **Example (defaults shown)**
 
@@ -197,8 +198,8 @@ these across platforms.
   "plugins": [
     ["semantic-release-react-native", {
       "versionStrategy": {
-        "android": { "preRelease": "semantic" },
-        "ios": { "preRelease": "strict" }
+        "android": { "preRelease": true },
+        "ios": { "preRelease": true }
       }
     }],
   ]
@@ -208,21 +209,7 @@ these across platforms.
 ### Android
 
 For Android, it is fine to use pre-release versions such as `1.2.3-beta.1`
-as the `vesionName`.
-
-#### `semantic`
-
-This is the default strategy for this platform.
-
-It uses the semantic version including the pre-release as normal.
-
-#### `short`
-
-This strategy behaves the same as the `short` strategy for iOS.
-
-#### `ignore`
-
-Ignore pre-release versions entirely.
+as the `vesionName`, so this is what we do.
 
 ### iOS
 
@@ -236,13 +223,9 @@ pre-release versions](https://developer.apple.com/library/archive/documentation/
 it allows a character in the set [**abdf**] followed by a number between 1 and 255
 to be set as a suffix after the version number.
 
-#### `short`
-
-This is the default strategy for this platform.
-
-It makes use of the `CFBundleVersion` in an attempt to help identify
-pre-release versions when you upload your app via App Store Connect, while still
-complying with the documented guidelines.
+This plugin makes use of this feature of `CFBundleVersion` in an attempt to help
+identify pre-release versions when you upload your app via App Store Connect,
+while still complying with the documented guidelines.
 
 It does this by taking the first character of your pre-release label and, if that
 character is one of those in the allowed character set, uses that as the suffix
@@ -257,10 +240,6 @@ version is `1000.1.1` then:
 
 Note that this feature only works when using the `strict` versioning strategy
 for iOS (which is the default).
-
-#### `ignore`
-
-Ignore pre-release versions entirely.
 
 ## Xcode project files
 

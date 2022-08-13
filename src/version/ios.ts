@@ -317,7 +317,7 @@ export const versionIos = (
 
   if (
     isPreRelease(nextRelease)
-    && pluginConfig.versionStrategy.ios?.preRelease === 'ignore'
+    && pluginConfig.versionStrategy.ios?.preRelease === false
   ) {
     logger.info('Skipping pre-release version for iOS');
 

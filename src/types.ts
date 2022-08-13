@@ -9,11 +9,11 @@ export type PluginConfig = {
   versionStrategy?: {
     android?: {
       buildNumber?: 'increment' | 'relative' | 'relative-extended' | 'none';
-      preRelease?: 'semantic' | 'short' | 'ignore';
+      preRelease?: boolean;
     },
     ios?: {
       buildNumber?: 'strict' | 'increment' | 'relative' | 'semantic' | 'none';
-      preRelease?: 'short' | 'ignore';
+      preRelease?: boolean;
     };
   };
 };

@@ -152,14 +152,14 @@ describe('Publish', () => {
       expect(fs.writeFileSync).not.toHaveBeenCalled();
     });
 
-    it('skips a prerelease version if the ignore strategy is being used', async () => {
+    it('skips a prerelease version if disabled for the platform', async () => {
       const context = createContext({ version: '1.2.3-beta.1' });
 
       await publish({
         skipIos: true,
         versionStrategy: {
           android: {
-            preRelease: 'ignore',
+            preRelease: false,
           },
         },
       }, context);
@@ -1013,14 +1013,14 @@ describe('Publish', () => {
       });
     });
 
-    it('skips a prerelease version if the ignore strategy is being used', async () => {
+    it('skips a prerelease version if disabled for the platform', async () => {
       const context = createContext({ version: '1.2.3-beta.1' });
 
       await publish({
         skipAndroid: true,
         versionStrategy: {
           ios: {
-            preRelease: 'ignore',
+            preRelease: false,
           },
         },
       }, context);
