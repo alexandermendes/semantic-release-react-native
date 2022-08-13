@@ -1,3 +1,15 @@
+# [1.4.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.3.4...v1.4.0) (2022-08-13)
+
+
+### Bug Fixes
+
+* use iosPackageName to ignore plist updates too ([31c09db](https://github.com/alexandermendes/semantic-release-react-native/commit/31c09db1e26072a77da531ff385a51306ac92d9b))
+
+
+### Features
+
+* validate remaining plugin config options ([5daaaba](https://github.com/alexandermendes/semantic-release-react-native/commit/5daaaba09f9c86f43bf36d55023064231088cd61))
+
 ## [1.3.4](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.3.3...v1.3.4) (2022-08-13)
 
 
