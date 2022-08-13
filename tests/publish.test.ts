@@ -327,7 +327,7 @@ describe('Publish', () => {
       },
     );
 
-    it.only.each`
+    it.each`
       version               | previousBundleVersion | expectedBundleVersion
       ${'1.2.3-alpha.1'}    | ${'1.1.1'}            | ${'1.1.2a1'}
       ${'1.2.3-beta.3'}     | ${'1.1.1'}            | ${'1.1.2b3'}
