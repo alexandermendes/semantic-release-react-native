@@ -1,3 +1,12 @@
+# [1.5.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.4.1...v1.5.0) (2022-08-13)
+
+
+### Features
+
+* add ios versioning strategies ([351b94c](https://github.com/alexandermendes/semantic-release-react-native/commit/351b94c6cfb6ec02eff1f1e7ac172739d0acc96a))
+* add semantic version strategy for ios ([d74843b](https://github.com/alexandermendes/semantic-release-react-native/commit/d74843bc9eceefdafe156a8c01c526b1ab5ac211))
+* implement more android version strategies ([6d7c605](https://github.com/alexandermendes/semantic-release-react-native/commit/6d7c605f1f5f316c3a710870ee40038bdbdc4157))
+
 ## [1.4.1](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.4.0...v1.4.1) (2022-08-13)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "semantic-release-react-native",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Semantic Release plugin for versioning React Native applications.",
   "author": "Alex Mendes",
   "license": "ISC",
