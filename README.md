@@ -43,15 +43,15 @@ The example configuration above will version and git commit your native files.
 
 ## Configuration
 
-| Property               | Description                                               | Default                    |
-|------------------------|-----------------------------------------------------------|----------------------------|
-| `androidPath`          | Path to your "android/app/build.gradle" file.             | `android/app/build.gradle` |
-| `iosPath`              | Path to your "ios/" folder.                               | `ios`                      |
-| `skipBuildNumber`      | Do not increment the build number.                        | `false`                    |
-| `skipAndroid`          | Skip Android versioning.                                  | `false`                    |
-| `skipIos`              | Skip iOS versioning.                                      | `false`                    |
-| `iosPackageName`       | Only update iOS projects that have the given name.        | `undefined`                |
-| `noPrerelease`         | Strip pre-release labels from versions for both platfoms. | `undefined`                |
+| Property               | Description                                                | Default                    |
+|------------------------|------------------------------------------------------------|----------------------------|
+| `androidPath`          | Path to your "android/app/build.gradle" file.              | `android/app/build.gradle` |
+| `iosPath`              | Path to your "ios/" folder.                                | `ios`                      |
+| `skipBuildNumber`      | Do not increment the build number.                         | `false`                    |
+| `skipAndroid`          | Skip Android versioning.                                   | `false`                    |
+| `skipIos`              | Skip iOS versioning.                                       | `false`                    |
+| `iosPackageName`       | Only update iOS projects that have the given name.         | `null`                     |
+| `noPrerelease`         | Strip pre-release labels from versions for both platforms. | `false`                    |
 
 ## Versioning strategies
 
