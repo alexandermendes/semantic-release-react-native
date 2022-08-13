@@ -1,3 +1,5 @@
+import { PluginConfig } from './types';
+
 export class SemanticReleaseError extends Error {
   name: 'SemanticReleaseError';
 
@@ -17,26 +19,37 @@ export class SemanticReleaseError extends Error {
   }
 }
 
-type ErrorCodes = 'ENRNANDROIDPATH' | 'ENRNIOSPATH';
+type ErrorCodes = 'ENRNANDROIDPATH'
+  | 'ENRNIOSPATH'
+  | 'ENRNNOTBOOLEAN'
+  | 'ENRNNOTSTRING';
 
-type ErrorDefinition = {
+type ErrorDefinition = (key: keyof PluginConfig) => {
   message: string;
   details: string;
 };
 
 const ERROR_DEFINITIONS: Record<ErrorCodes, ErrorDefinition> = {
-  ENRNANDROIDPATH: {
-    message: 'Invalid `androidPath`',
-    details: 'The `androidPath` must point to an existing build.gradle file.',
-  },
-  ENRNIOSPATH: {
-    message: 'Invalid `iosPath`',
-    details: 'The `iosPath` must point to an existing directory.',
-  },
+  ENRNANDROIDPATH: (key: keyof PluginConfig) => ({
+    message: `Invalid ${key}`,
+    details: `The ${key} must point to an existing build.gradle file.`,
+  }),
+  ENRNIOSPATH: (key: keyof PluginConfig) => ({
+    message: `Invalid ${key}`,
+    details: `The ${key} must point to an existing directory.`,
+  }),
+  ENRNNOTBOOLEAN: (key: keyof PluginConfig) => ({
+    message: `Invalid ${key}`,
+    details: `The ${key} must be a boolean.`,
+  }),
+  ENRNNOTSTRING: (key: keyof PluginConfig) => ({
+    message: `Invalid ${key}`,
+    details: `The ${key} must be a string.`,
+  }),
 };
 
-export const getError = (code: ErrorCodes) => {
-  const { message, details } = ERROR_DEFINITIONS[code];
+export const getError = (key: keyof PluginConfig, code: ErrorCodes) => {
+  const { message, details } = ERROR_DEFINITIONS[code](key);
 
   return new SemanticReleaseError(message, code, details);
 };

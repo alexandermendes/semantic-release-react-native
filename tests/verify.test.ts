@@ -13,7 +13,7 @@ describe('verifyConditions', () => {
       const errors = verifyConditons({ androidPath: 'no-good' });
 
       expect(errors).toEqual([
-        new Error('Invalid `androidPath`'),
+        new Error('Invalid androidPath'),
       ]);
     });
 
@@ -25,7 +25,7 @@ describe('verifyConditions', () => {
       const errors = verifyConditons({ androidPath });
 
       expect(errors).toEqual([
-        new Error('Invalid `androidPath`'),
+        new Error('Invalid androidPath'),
       ]);
 
       expect(fs.existsSync).toHaveBeenCalledTimes(1);
@@ -42,7 +42,7 @@ describe('verifyConditions', () => {
       const errors = verifyConditons({ iosPath });
 
       expect(errors).toEqual([
-        new Error('Invalid `iosPath`'),
+        new Error('Invalid iosPath'),
       ]);
 
       expect(fs.existsSync).toHaveBeenCalledTimes(1);
@@ -57,11 +57,45 @@ describe('verifyConditions', () => {
       const errors = verifyConditons({ iosPath });
 
       expect(errors).toEqual([
-        new Error('Invalid `iosPath`'),
+        new Error('Invalid iosPath'),
       ]);
 
       expect(fs.lstatSync).toHaveBeenCalledTimes(1);
       expect(fs.lstatSync).toHaveBeenCalledWith(iosPath);
+    });
+  });
+
+  describe.each([
+    'skipBuildNumber',
+    'skipAndroid',
+    'skipIos',
+    'noPrerelease',
+  ])('%s', (key) => {
+    it('errors if not a boolean', () => {
+      // @ts-ignore
+      const errors = verifyConditons({ [key]: 'no good' });
+
+      expect(errors).toEqual([
+        new Error(`Invalid ${key}`),
+      ]);
+    });
+
+    it.each([true, false])('does not error if %s', (value) => {
+      // @ts-ignore
+      const errors = verifyConditons({ [key]: value });
+
+      expect(errors).toEqual([]);
+    });
+  });
+
+  describe('iosPackageName', () => {
+    it('errors if not a string', () => {
+      // @ts-ignore
+      const errors = verifyConditons({ iosPackageName: false });
+
+      expect(errors).toEqual([
+        new Error('Invalid iosPackageName'),
+      ]);
     });
   });
 });

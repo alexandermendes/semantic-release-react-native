@@ -1,7 +1,7 @@
 export type PluginConfig = {
   androidPath?: string;
   iosPath?: string;
-  iosPackageName?: string | null;
+  iosPackageName?: String | string | null;
   skipBuildNumber?: boolean;
   skipAndroid?: boolean;
   skipIos?: boolean;
