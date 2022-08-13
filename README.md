@@ -172,13 +172,13 @@ hopefully Apple won't complain!
 
 This strategy behaves the same as the `increment` strategy for Android.
 
-Note the potential risks around In App Purchases described above.
-
 #### `relative`
 
 This strategy behaves the same as the `relative` strategy for Android.
 
-Again, note the potential risks around In App Purchases described above.
+#### `semantic`
+
+Use the semantic version number directly.
 
 #### `none`
 

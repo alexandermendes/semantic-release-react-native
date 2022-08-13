@@ -974,5 +974,39 @@ describe('Publish', () => {
         });
       },
     );
+
+    it('updates using the semantic versioning strategy', async () => {
+      const context = createContext({ version: '1.2.3-alpha.1' });
+
+      (plist.parse as jest.Mock).mockReturnValue({
+        CFBundleVersion: '1.1.1',
+      });
+
+      getBuildSetting.mockImplementation((value: string) => ({
+        INFOPLIST_FILE: { text: 'Test/Info.plist' },
+        CURRENT_PROJECT_VERSION: { text: '1.1.1' },
+      }[value]));
+
+      await publish({
+        skipAndroid: true,
+        versionStrategy: {
+          ios: {
+            buildNumber: 'semantic',
+          },
+        },
+      }, context);
+
+      expect(plist.build).toHaveBeenCalledTimes(1);
+      expect((plist.build as jest.Mock).mock.calls[0][0].CFBundleVersion).toBe(
+        '1.2.3',
+      );
+
+      expect(buildConfig.patch).toHaveBeenCalledTimes(1);
+      expect(buildConfig.patch).toHaveBeenCalledWith({
+        buildSettings: {
+          CURRENT_PROJECT_VERSION: '1.2.3',
+        },
+      });
+    });
   });
 });

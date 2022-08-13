@@ -11,7 +11,7 @@ export type PluginConfig = {
       buildNumber: 'increment' | 'relative' | 'relative-extended' | 'none';
     },
     ios?: {
-      buildNumber: 'strict' | 'increment' | 'relative' | 'none';
+      buildNumber: 'strict' | 'increment' | 'relative' | 'semantic' | 'none';
     };
   };
 };
