@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.3.1...v1.3.2) (2022-08-13)
+
+
+### Bug Fixes
+
+* plugin index file ([62e8738](https://github.com/alexandermendes/semantic-release-react-native/commit/62e87382c9d491206cdc8c7d54b358958a43918c))
+
 ## [1.3.1](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.3.0...v1.3.1) (2022-08-13)
 
 
