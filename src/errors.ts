@@ -1,4 +1,21 @@
-import SemanticReleaseError from '@semantic-release/error';
+export class SemanticReleaseError extends Error {
+  name: 'SemanticReleaseError';
+
+  code: string;
+
+  details: string;
+
+  semanticRelease: true;
+
+  constructor(message: string, code: string, details: string) {
+    super(message);
+    Error.captureStackTrace(this, this.constructor);
+    this.name = 'SemanticReleaseError';
+    this.code = code;
+    this.details = details;
+    this.semanticRelease = true;
+  }
+}
 
 type ErrorCodes = 'ENRNANDROIDPATH' | 'ENRNIOSPATH';
 
