@@ -8,10 +8,12 @@ export type PluginConfig = {
   noPrerelease?: boolean;
   versionStrategy?: {
     android?: {
-      buildNumber: 'increment' | 'relative' | 'relative-extended' | 'none';
+      buildNumber?: 'increment' | 'relative' | 'relative-extended' | 'none';
+      preRelease?: boolean;
     },
     ios?: {
-      buildNumber: 'strict' | 'increment' | 'relative' | 'semantic' | 'none';
+      buildNumber?: 'strict' | 'increment' | 'relative' | 'semantic' | 'none';
+      preRelease?: boolean;
     };
   };
 };

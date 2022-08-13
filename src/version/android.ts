@@ -3,7 +3,7 @@ import path from 'path';
 import type { Context } from 'semantic-release';
 import type { FullPluginConfig } from '../types';
 import { toAbsolutePath } from '../paths';
-import { getSemanticBuildNumber, getVersion } from './utils';
+import { getSemanticBuildNumber, isPreRelease } from './utils';
 
 /**
  * Get the path to the Android bundle.gradle file.
@@ -79,10 +79,19 @@ export const versionAndroid = (
   pluginConfig: FullPluginConfig,
   context: Context,
 ) => {
-  const { logger } = context;
-  const version = getVersion(pluginConfig.noPrerelease, context.nextRelease);
+  const { logger, nextRelease } = context;
+  const { version } = nextRelease ?? {};
 
   if (!version) {
+    return;
+  }
+
+  if (
+    isPreRelease(nextRelease)
+    && pluginConfig.versionStrategy.android?.preRelease === false
+  ) {
+    logger.info('Skipping pre-release version for Android');
+
     return;
   }
 

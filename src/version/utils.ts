@@ -46,14 +46,10 @@ export const getSemanticBuildNumber = (
 };
 
 /**
- * Get the version to be released, if any.
+ * Check if the next release is a pre-release.
  */
-export const getVersion = (noPrerelease: boolean, nextRelease?: NextRelease) => {
-  if (!nextRelease) {
-    return null;
-  }
+export const isPreRelease = (nextRelease?: NextRelease) => {
+  const { version } = nextRelease ?? {};
 
-  return noPrerelease
-    ? stripPrereleaseVersion(nextRelease.version)
-    : nextRelease.version;
+  return version && semver.prerelease(version);
 };

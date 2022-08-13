@@ -3,6 +3,7 @@ import deepmerge from 'deepmerge';
 import type { FullPluginConfig, PluginConfig } from './types';
 import { versionAndroid } from './version/android';
 import { versionIos } from './version/ios';
+import { isPreRelease } from './version/utils';
 
 const applyPluginConfigDefaults = (pluginConfig: PluginConfig): FullPluginConfig => deepmerge({
   androidPath: 'android/app/build.gradle',
@@ -27,6 +28,13 @@ export const publish = async (
   context: Context,
 ) => {
   const pConfig = applyPluginConfigDefaults(pluginConfig);
+  const { logger, nextRelease } = context;
+
+  if (isPreRelease(nextRelease) && pluginConfig.noPrerelease) {
+    logger.info('Skipping pre-release version');
+
+    return;
+  }
 
   if (!pConfig.skipAndroid) {
     versionAndroid(pConfig, context);
