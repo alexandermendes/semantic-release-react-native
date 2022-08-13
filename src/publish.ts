@@ -163,7 +163,7 @@ const incrementPbxProjectBuildNumbers = (
         const currentBuildNumber = parseInt(
           buildConfig.ast.value
             .get('buildSettings')
-            .get(currentProjectVersionKey).text,
+            .get(currentProjectVersionKey)?.text,
           10,
         );
 
