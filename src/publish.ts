@@ -1,7 +1,8 @@
 import type { Context } from 'semantic-release';
 import deepmerge from 'deepmerge';
 import type { FullPluginConfig, PluginConfig } from './types';
-import { versionAndroid, versionIos } from './version';
+import { versionAndroid } from './version/android';
+import { versionIos } from './version/ios';
 
 const applyPluginConfigDefaults = (pluginConfig: PluginConfig): FullPluginConfig => deepmerge({
   androidPath: 'android/app/build.gradle',

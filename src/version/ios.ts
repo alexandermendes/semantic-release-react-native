@@ -1,22 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import plist, { PlistObject, PlistValue } from 'plist';
-import semver from 'semver';
 import { Xcode } from 'pbxproj-dom/xcode';
 import unique from 'lodash.uniq';
 import flattenDeep from 'lodash.flattendeep';
-import type { Context, NextRelease } from 'semantic-release';
-import type { FullPluginConfig } from './types';
-import { toAbsolutePath } from './paths';
-
-/**
- * Get the path to the Android bundle.gradle file.
- */
-const getAndroidPath = (androidPath?: string) => {
-  const defaultAndroidPath = path.join('android', 'app', 'build.gradle');
-
-  return toAbsolutePath(androidPath ?? defaultAndroidPath);
-};
+import type { Context } from 'semantic-release';
+import type { FullPluginConfig } from '../types';
+import { toAbsolutePath } from '../paths';
+import { getVersion, stripPrereleaseVersion } from './utils';
 
 /**
  * Get the path to the iOS Xcode project file.
@@ -25,46 +16,6 @@ const getIosPath = (iosPath?: string) => {
   const defaultIosPath = path.join('ios');
 
   return toAbsolutePath(iosPath ?? defaultIosPath);
-};
-
-/**
- * Strip any pre-release label from a version (e.g. 1.2.3-beta.1).
- *
- * iOS do not accept pre-release versions against CFBundleShortVersionString.
- *
- * @see https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleshortversionstring
- */
-const stripPrereleaseVersion = (version: string) => {
-  const major = semver.major(version);
-  const minor = semver.minor(version);
-  const patch = semver.patch(version);
-
-  return `${major}.${minor}.${patch}`;
-};
-
-/**
- * Get a build number that is relative to the semantic version.
- *
- * For example, v1.2.3 becomes 102030.
- */
-const getSemanticBuildNumber = (version: string, logger: Context['logger']) => {
-  const major = String(semver.major(version)).padEnd(2, '0');
-  const minor = String(semver.minor(version)).padEnd(2, '0');
-  const patch = String(semver.patch(version)).padEnd(2, '0');
-
-  const semanticBuildNumber = `${major}${minor}${patch}`;
-
-  if (major.length > 2 || minor.length > 2 || patch.length > 2) {
-    logger.warn(
-      'Could not update Android versionCode using the semantic strategy '
-      + 'as the numbers in your semantic version exceed two digits. It is '
-      + 'recommended that you switch to the increment strategy (see plugin docs).',
-    );
-
-    return null;
-  }
-
-  return semanticBuildNumber;
 };
 
 /**
@@ -304,75 +255,6 @@ const incrementPlistVersions = (
 };
 
 /**
- * Get the version to be released, if any.
- */
-const getVersion = (noPrerelease: boolean, nextRelease?: NextRelease) => {
-  if (!nextRelease) {
-    return null;
-  }
-
-  return noPrerelease
-    ? stripPrereleaseVersion(nextRelease.version)
-    : nextRelease.version;
-};
-
-/**
- * Get the next version code for Android according to the chosen strategy.
- */
-const getNextAndroidVersionCode = (
-  strategy: FullPluginConfig['versionStrategy']['android'],
-  logger: Context['logger'],
-  version: string,
-  currentVersionCode: string,
-  minSdkVersion?: string,
-) => {
-  if (strategy?.buildNumber === 'none') {
-    return currentVersionCode;
-  }
-
-  if (strategy?.buildNumber === 'semantic') {
-    const semanticBuildNumber = getSemanticBuildNumber(version, logger);
-
-    if (!semanticBuildNumber) {
-      return currentVersionCode;
-    }
-
-    return semanticBuildNumber;
-  }
-
-  if (strategy?.buildNumber === 'semantic-extended') {
-    if (!minSdkVersion) {
-      logger.warn(
-        'Could not update Android versionCode using the semantic-extended strategy '
-        + 'as the minSdkVersion could not be determined.',
-      );
-
-      return currentVersionCode;
-    }
-
-    if (minSdkVersion.length > 2) {
-      logger.warn(
-        'Could not update Android versionCode using the semantic-extended strategy '
-        + 'as the minSdkVersion is greater than 99. Welcome to the future. Have the '
-        + 'robots taken over yet?',
-      );
-
-      return currentVersionCode;
-    }
-
-    const semanticBuildNumber = getSemanticBuildNumber(version, logger);
-
-    if (!semanticBuildNumber) {
-      return currentVersionCode;
-    }
-
-    return `${minSdkVersion.padStart(2, '0')}0${semanticBuildNumber}`;
-  }
-
-  return String(parseInt(currentVersionCode, 10) + 1);
-};
-
-/**
  * Version iOS files.
  */
 export const versionIos = (
@@ -404,63 +286,5 @@ export const versionIos = (
   const xcode = Xcode.open(path.join(projectFolder, 'project.pbxproj'));
 
   incrementPbxProjectBuildNumbers(xcode, logger, version, pluginConfig);
-
   incrementPlistVersions(pluginConfig, xcode, iosPath, version, logger);
-};
-
-/**
- * Update Android files with the new version.
- *
- * @see https://developer.android.com/studio/publish/versioning
- */
-export const versionAndroid = (
-  pluginConfig: FullPluginConfig,
-  context: Context,
-) => {
-  const { logger } = context;
-  const version = getVersion(pluginConfig.noPrerelease, context.nextRelease);
-
-  if (!version) {
-    return;
-  }
-
-  logger.info('Versioning Android');
-
-  const androidPath = getAndroidPath(pluginConfig.androidPath);
-
-  if (!fs.existsSync(androidPath)) {
-    logger.error(`No file found at ${androidPath}`);
-
-    return;
-  }
-
-  let gradleFile = fs.readFileSync(androidPath).toString();
-  let newBuildNumber;
-
-  gradleFile = gradleFile.replace(
-    /versionName (["'])(.*)["']/,
-    `versionName $1${version}$1`,
-  );
-
-  logger.success(`Android versionName > ${version}`);
-
-  if (!pluginConfig.skipBuildNumber) {
-    const [, minSdkVersion] = gradleFile.match(/minSdkVersion (\d+)/) || [];
-
-    gradleFile = gradleFile.replace(/versionCode (\d+)/, (_match, currentVersionCode) => {
-      newBuildNumber = getNextAndroidVersionCode(
-        pluginConfig.versionStrategy.android,
-        logger,
-        version,
-        currentVersionCode,
-        minSdkVersion,
-      );
-
-      return `versionCode ${newBuildNumber}`;
-    });
-
-    logger.success(`Android versionCode > ${newBuildNumber}`);
-  }
-
-  fs.writeFileSync(androidPath, gradleFile);
 };
