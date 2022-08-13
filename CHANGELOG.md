@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.1.0...v1.2.0) (2022-08-13)
+
+
+### Features
+
+* add noPrerelease option ([2ad5a27](https://github.com/alexandermendes/semantic-release-react-native/commit/2ad5a271fba5a822e7ce11b6416b4ad5df863be9))
+
 # [1.1.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.0.1...v1.1.0) (2022-08-12)
 
 
