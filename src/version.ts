@@ -247,25 +247,30 @@ const incrementPlistVersions = (
 ) => {
   const plistFilenames = getPlistFilenames(xcode);
 
-  plistFilenames.forEach((plistFilename) => {
-    const plistFile = fs.readFileSync(
-      path.join(iosPath, plistFilename),
-    ).toString();
+  plistFilenames
+    .filter((plistFilename) => (
+      !pluginConfig.iosPackageName
+      || path.dirname(plistFilename) === pluginConfig.iosPackageName
+    ))
+    .forEach((plistFilename) => {
+      const plistFile = fs.readFileSync(
+        path.join(iosPath, plistFilename),
+      ).toString();
 
-    const plistObj = plist.parse(plistFile);
+      const plistObj = plist.parse(plistFile);
 
-    if (!isPlistObject(plistObj)) {
-      return;
-    }
+      if (!isPlistObject(plistObj)) {
+        return;
+      }
 
-    updateCfBundleShortVersion(plistFilename, plistObj, version, logger);
+      updateCfBundleShortVersion(plistFilename, plistObj, version, logger);
 
-    if (!pluginConfig.skipBuildNumber) {
-      updateCfBundleVersion(plistFilename, plistObj, version, logger);
-    }
+      if (!pluginConfig.skipBuildNumber) {
+        updateCfBundleVersion(plistFilename, plistObj, version, logger);
+      }
 
-    fs.writeFileSync(path.join(iosPath, plistFilename), plist.build(plistObj));
-  });
+      fs.writeFileSync(path.join(iosPath, plistFilename), plist.build(plistObj));
+    });
 };
 
 /**

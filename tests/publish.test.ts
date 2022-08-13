@@ -52,6 +52,7 @@ const mockXcode = {
       {
         targets: [
           {
+            name: 'Test',
             buildConfigurationsList: {
               buildConfigurations: [buildConfig],
             },
@@ -448,6 +449,106 @@ describe('Publish', () => {
 
       expect(buildConfig.patch).toHaveBeenCalledTimes(1);
       expect(buildConfig.patch).toHaveBeenCalledWith({
+        buildSettings: {
+          CURRENT_PROJECT_VERSION: '1.1.2',
+        },
+      });
+    });
+
+    it('ignores other projects if the iosPackageName option was given', async () => {
+      const context = createContext();
+
+      (Xcode.open as jest.Mock).mockReturnValue({
+        save: jest.fn(),
+        document: {
+          projects: [
+            {
+              targets: [
+                {
+                  name: 'ProjectOne',
+                  buildConfigurationsList: {
+                    buildConfigurations: [
+                      {
+                        ast: {
+                          value: {
+                            get: () => ({
+                              get: (value: string) => ({
+                                INFOPLIST_FILE: { text: 'ProjectOne/Info.plist' },
+                                CURRENT_PROJECT_VERSION: { text: '1.1.1' },
+                              }[value]),
+                            }),
+                          },
+                        },
+                        patch: jest.fn(),
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      });
+
+      await publish({ skipAndroid: true, iosPackageName: 'ProjectTwo' }, context);
+
+      expect(plist.build).not.toHaveBeenCalled();
+
+      expect(buildConfig.patch).not.toHaveBeenCalledTimes(1);
+    });
+
+    it('does not ignore project identified by the given iosPackageName option', async () => {
+      const context = createContext();
+      const patch = jest.fn();
+
+      (Xcode.open as jest.Mock).mockReturnValue({
+        save: jest.fn(),
+        document: {
+          projects: [
+            {
+              targets: [
+                {
+                  name: 'ProjectOne',
+                  buildConfigurationsList: {
+                    buildConfigurations: [
+                      {
+                        ast: {
+                          value: {
+                            get: () => ({
+                              get: (value: string) => ({
+                                INFOPLIST_FILE: { text: 'ProjectOne/Info.plist' },
+                                CURRENT_PROJECT_VERSION: { text: '1.1.1' },
+                              }[value]),
+                            }),
+                          },
+                        },
+                        patch,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      });
+
+      (plist.parse as jest.Mock).mockReturnValue({
+        CFBundleDisplayName: 'My App',
+        CFBundleVersion: '100',
+      });
+
+      await publish({ skipAndroid: true, iosPackageName: 'ProjectOne' }, context);
+
+      expect(plist.build).toHaveBeenCalledTimes(1);
+      expect(plist.build).toHaveBeenCalledWith({
+        CFBundleDisplayName: 'My App',
+        CFBundleShortVersionString: '1.2.3',
+        CFBundleVersion: '100.1.1',
+      });
+
+      expect(patch).toHaveBeenCalledTimes(1);
+      expect(patch).toHaveBeenCalledWith({
         buildSettings: {
           CURRENT_PROJECT_VERSION: '1.1.2',
         },
