@@ -82,18 +82,18 @@ const getCfBundleVersion = (previousBundleVersion: string, version: string) => {
 
   let bundleVersion = `${major}.${minor}.${patch}`;
 
-  const preReleaseLabel = version.split('-');
+  const [, preReleaseLabel] = version.split('-');
 
   if (!preReleaseLabel) {
     return bundleVersion;
   }
 
-  const preReleaseChar = preReleaseLabel[1][0];
+  const preReleaseChar = preReleaseLabel[0];
   const validPreReleaseChar = ['a', 'b', 'd', 'f'].includes(preReleaseChar)
     ? preReleaseChar
     : 'f';
 
-  const preReleaseVersion = parseInt(preReleaseLabel[1]?.split('.')[1] ?? 0, 10);
+  const preReleaseVersion = parseInt(preReleaseLabel.split('.')[1] ?? 1, 10);
 
   bundleVersion += `${validPreReleaseChar}${preReleaseVersion}`;
 
