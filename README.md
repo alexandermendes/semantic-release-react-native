@@ -64,59 +64,67 @@ release.
 For build numbers the differences between the platforms make things a little more
 complicated.
 
-For Android, the `versionCode` is an integer that must be incremented with every
-version of the app that you plan to release. To keep things simple this plugin
-auto-increments the current `versionCode` by one for every release. The maximum
-value currently allowed by the Google Play Store is 2100000000, so there should
+#### Android
+
+For Android, the `versionCode` is an integer that must be incremented in some way
+with every version of the app. To keep things simple this plugin auto-increments
+the current `versionCode` by one for every release. The maximum value currently
+allowed by the Google Play Store is 2100000000, so there should
 be plenty of room here for even the most productive of developers.
 
-For iOS, there is a lot of conflicting information around what constitutes a
-technically correct `CFBundleVersion`. The general consensus seems to be that it
-should be a string comprised of three non-negative, period-separated integers.
-So, it may seem that using the semantic version here would make sense, except
-that [some of Apple's documentation](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html#//apple_ref/doc/uid/20001431-102364)
+#### iOS
+
+For iOS, there is a lot of conflicting information out there around what
+constitutes a technically correct `CFBundleVersion`. The general consensus seems
+to be that it should be a string comprised of three non-negative, period-separated
+integers. So, it may seem that using the semantic version here would make sense,
+except that [some of Apple's documentation](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html#//apple_ref/doc/uid/20001431-102364)
 mentions that what would be the MINOR and PATCH parts of the semantic version
 are limited to two digits, which could be quite restrictive for projects that
 do not generate a lot of breaking changes (i.e. `v1.100.1` would be invalid).
 
-So, for the purpose as allowing as many increments as possible and not breaking
-Apple's (rather ambiguous) rules this plugin will auto-increment the
-`CFBundleVersion` in the format `xxxx.xx.xx`, for example:
+So, in order to allow as many increments as possible during the lifecycle of an
+app and not breaking Apple's (rather ambiguous) rules this plugin will
+auto-increment the `CFBundleVersion` in the format `xxxx.xx.xx`, for example:
 
 - `1000.1.1` > `1000.1.2`
 - `1000.1.99` > `1000.2.1`
 - `1000.99.99` > `1001.1.1`
 
-Note that if your current `CFBundleVersion` is already greater that 9999 then,
-according to the documentation above it is already invalid anyway, so we will
-just keep incrementing it following the pattern described here and hopefully
+Note that if your current `CFBundleVersion` is already greater that 9999 then
+according to the documentation above it is already invalid. So, we will
+just keep incrementing it following the pattern described above and hopefully
 Apple won't complain!
 
 ### Pre-releases
 
-For Android, pre-release versions set against the `vesionName` are fine
-(e.g. `1.2.3-beta.1`).
+Pre-release versions present to major challenges for Android, but iOS again gets
+a little more complicated.
+
+#### Android
+
+For Android, it is fine to use pre-release versions such as `1.2.3-beta.1`
+as the `vesionName`.
+
+#### iOS
 
 For iOS, the `CFBundleShortVersionString`
 property [does not support pre-release versions](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html#//apple_ref/doc/uid/20001431-111349),
-so these will be stripped from the version set against this property in
-your `Info.plist` file (e.g. `1.2.3-beta.1` becomes `1.2.3`).
+so this plugin will be strip and pre-release labels from the version set against
+this property (e.g. `1.2.3-beta.1` becomes `1.2.3`).
 
 However, the `CFBundleVersion` [does seem to have some provision for specifying
 pre-release versions](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html#//apple_ref/doc/uid/20001431-102364), in that
-it allows a character in the set [abdf] followed by a number between 1 and 255
+it allows a character in the set [**abdf**] followed by a number between 1 and 255
 to be set as a suffix after the version number.
 
-This plugin will make use of this feature in an attempt to help identify
-pre-release versions when you upload your app to the stores. It does this by
-taking the first character of your pre-release label and if that character is
-one of those in the allowed set using that as the suffix along with the pre-release
-version. If the character is not one of those in the allowed set we fall back to
-`f`. For example, if the next bundle version is `1000.1.1` then:
-
-by taking the first character of your pre-release version, followed by the
-pre-release version number. For example, if the next semantic version is
-`1.2.3-beta.1` then:
+This plugin makes use of this feature in an attempt to help identify
+pre-release versions when you upload your app via App Store Connect. It does
+this by taking the first character of your pre-release label and, if that character
+is one of those in the allowed character set, uses that as the suffix along with
+the pre-release version. If the character is not one of those in the allowed set
+we fall back to the letter `f`. For example, if the next bundle version is
+`1000.1.1` then:
 
 - `1.2.3-alpha.1` > `1000.1.1a1`
 - `1.2.3-beta.3` > `1000.1.1b3`
