@@ -3,7 +3,7 @@ import path from 'path';
 import type { Context } from 'semantic-release';
 import type { FullPluginConfig } from '../types';
 import { toAbsolutePath } from '../paths';
-import { getSemanticBuildNumber, getVersion } from './utils';
+import { getSemanticBuildNumber } from './utils';
 
 /**
  * Get the path to the Android bundle.gradle file.
@@ -80,7 +80,7 @@ export const versionAndroid = (
   context: Context,
 ) => {
   const { logger } = context;
-  const version = getVersion(pluginConfig.noPrerelease, context.nextRelease);
+  const { version } = context.nextRelease ?? {};
 
   if (!version) {
     return;

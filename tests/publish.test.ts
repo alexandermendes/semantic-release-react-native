@@ -144,15 +144,12 @@ describe('Publish', () => {
       ].join('\n'));
     });
 
-    it('strips a prerelease version if noPrerelease option given', async () => {
+    it('skips a prerelease version if noPrerelease option given', async () => {
       const context = createContext({ version: '1.2.3-beta.1' });
 
       await publish({ skipIos: true, noPrerelease: true }, context);
 
-      expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
-        'versionName "1.2.3"',
-        'versionCode 101',
-      ].join('\n'));
+      expect(fs.writeFileSync).not.toHaveBeenCalled();
     });
 
     it('loads a build.gradle from a custom path', async () => {
@@ -646,7 +643,7 @@ describe('Publish', () => {
       },
     );
 
-    it('strips a prerelease version if noPrerelease option given', async () => {
+    it('skips a prerelease version if noPrerelease option given', async () => {
       const context = createContext({ version: '1.2.3-alpha.1' });
 
       (plist.parse as jest.Mock).mockReturnValue({
@@ -660,17 +657,9 @@ describe('Publish', () => {
 
       await publish({ skipAndroid: true, noPrerelease: true }, context);
 
-      expect(plist.build).toHaveBeenCalledTimes(1);
-      expect((plist.build as jest.Mock).mock.calls[0][0].CFBundleVersion).toBe(
-        '1.1.2',
-      );
+      expect(plist.build).not.toHaveBeenCalled();
 
-      expect(buildConfig.patch).toHaveBeenCalledTimes(1);
-      expect(buildConfig.patch).toHaveBeenCalledWith({
-        buildSettings: {
-          CURRENT_PROJECT_VERSION: '1.1.2',
-        },
-      });
+      expect(buildConfig.patch).not.toHaveBeenCalled();
     });
 
     it('ignores any variables against the CFBundleVersion and CFBundleShortVersionString', async () => {

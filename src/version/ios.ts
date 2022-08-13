@@ -7,7 +7,7 @@ import flattenDeep from 'lodash.flattendeep';
 import type { Context } from 'semantic-release';
 import type { FullPluginConfig } from '../types';
 import { toAbsolutePath } from '../paths';
-import { getSemanticBuildNumber, getVersion, stripPrereleaseVersion } from './utils';
+import { getSemanticBuildNumber, stripPrereleaseVersion } from './utils';
 
 /**
  * Get the path to the iOS Xcode project file.
@@ -309,7 +309,7 @@ export const versionIos = (
   context: Context,
 ) => {
   const { logger } = context;
-  const version = getVersion(pluginConfig.noPrerelease, context.nextRelease);
+  const { version } = context.nextRelease ?? {};
 
   if (!version) {
     return;
