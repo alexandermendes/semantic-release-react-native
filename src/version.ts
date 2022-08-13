@@ -199,22 +199,20 @@ const updateCfBundleVersion = (
   version: string,
   logger: Context['logger'],
 ) => {
-  const currentBuildVersion = plistObj.CFBundleVersion ? String(plistObj.CFBundleVersion) : '';
+  const key = 'CFBundleVersion';
+  const currentBuildVersion = plistObj[key] ? String(plistObj[key]) : '';
   const newBuildVersion = getIosBundleVersion(currentBuildVersion, version);
 
   if (currentBuildVersion.startsWith('$(')) {
     logger.info(
-      `Not updating iOS ${plistFilename} CFBundleVersion as it is the variable "${currentBuildVersion}"`,
+      `Not updating iOS ${plistFilename} ${key} as it is the variable "${currentBuildVersion}"`,
     );
 
     return;
   }
 
-  Object.assign(plistObj, {
-    CFBundleVersion: newBuildVersion,
-  });
-
-  logger.success(`iOS ${plistFilename} CFBundleVersion > ${newBuildVersion}`);
+  Object.assign(plistObj, { [key]: newBuildVersion });
+  logger.success(`iOS ${plistFilename} ${key} > ${newBuildVersion}`);
 };
 
 /**
@@ -226,13 +224,20 @@ const updateCfBundleShortVersion = (
   version: string,
   logger: Context['logger'],
 ) => {
+  const key = 'CFBundleShortVersionString';
   const shortVersion = stripPrereleaseVersion(version);
+  const currentVersion = plistObj[key];
 
-  Object.assign(plistObj, {
-    CFBundleShortVersionString: shortVersion,
-  });
+  if (String(currentVersion).startsWith('$(')) {
+    logger.info(
+      `Not updating iOS ${plistFilename} ${key} as it is the variable "${currentVersion}"`,
+    );
 
-  logger.success(`iOS ${plistFilename} CFBundleShortVersionString > ${shortVersion}`);
+    return;
+  }
+
+  Object.assign(plistObj, { [key]: shortVersion });
+  logger.success(`iOS ${plistFilename} ${key} > ${shortVersion}`);
 };
 
 /**

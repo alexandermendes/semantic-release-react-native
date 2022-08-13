@@ -423,14 +423,16 @@ describe('Publish', () => {
       });
     });
 
-    it('ignores any variables against the CFBundleVersion', async () => {
+    it('ignores any variables against the CFBundleVersion and CFBundleShortVersionString', async () => {
       (plist.parse as jest.Mock).mockReturnValue({
+        CFBundleShortVersionString: '$(MARKETING_VERSION)',
         CFBundleVersion: '$(CURRENT_PROJECT_VERSION)',
       });
 
       getBuildSetting.mockImplementation((value: string) => ({
         INFOPLIST_FILE: { text: 'Test/Info.plist' },
         CURRENT_PROJECT_VERSION: { text: '1.1.1' },
+        MARKETING_VERSION: { text: '1.1.1' },
       }[value]));
 
       const context = createContext();
@@ -439,7 +441,7 @@ describe('Publish', () => {
 
       expect(plist.build).toHaveBeenCalledTimes(1);
       expect(plist.build).toHaveBeenCalledWith({
-        CFBundleShortVersionString: '1.2.3',
+        CFBundleShortVersionString: '$(MARKETING_VERSION)',
         CFBundleVersion: '$(CURRENT_PROJECT_VERSION)',
       });
 
@@ -447,9 +449,14 @@ describe('Publish', () => {
         'Not updating iOS Test/Info.plist CFBundleVersion as it is the variable "$(CURRENT_PROJECT_VERSION)"',
       );
 
+      expect(logger.info).toHaveBeenCalledWith(
+        'Not updating iOS Test/Info.plist CFBundleShortVersionString as it is the variable "$(MARKETING_VERSION)"',
+      );
+
       expect(buildConfig.patch).toHaveBeenCalledTimes(1);
       expect(buildConfig.patch).toHaveBeenCalledWith({
         buildSettings: {
+          MARKETING_VERSION: '1.2.3',
           CURRENT_PROJECT_VERSION: '1.1.2',
         },
       });
