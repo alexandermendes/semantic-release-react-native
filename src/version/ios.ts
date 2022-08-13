@@ -315,9 +315,17 @@ export const versionIos = (
     return;
   }
 
+  const { preRelease, buildNumber } = pluginConfig.versionStrategy.ios ?? {};
+
   if (
     isPreRelease(nextRelease)
-    && pluginConfig.versionStrategy.ios?.preRelease === false
+    && (
+      preRelease === false
+      || (
+        buildNumber
+        && buildNumber !== 'strict'
+      )
+    )
   ) {
     logger.info('Skipping pre-release version for iOS');
 
