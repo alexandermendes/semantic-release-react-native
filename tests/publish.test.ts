@@ -205,6 +205,12 @@ describe('Publish', () => {
       });
 
       (plist.build as jest.Mock).mockReturnValue('mock-built-plist');
+
+      getBuildSetting.mockImplementation((value: string) => ({
+        INFOPLIST_FILE: { text: 'Test/Info.plist' },
+        CURRENT_PROJECT_VERSION: { text: 1 },
+        MARKETING_VERSION: { text: '1.1.1' },
+      }[value]));
     });
 
     it('updates the project.pbxproj file', async () => {
@@ -215,7 +221,8 @@ describe('Publish', () => {
       expect(buildConfig.patch).toHaveBeenCalledTimes(1);
       expect(buildConfig.patch).toHaveBeenCalledWith({
         buildSettings: {
-          CURRENT_PROJECT_VERSION: 2,
+          CURRENT_PROJECT_VERSION: '1.1.1',
+          MARKETING_VERSION: '1.2.3',
         },
       });
 
@@ -260,7 +267,7 @@ describe('Publish', () => {
       });
     });
 
-    it('skips incrementing the CFBundleVersion', async () => {
+    it('skips incrementing the bundle version', async () => {
       const context = createContext();
 
       await publish({ skipAndroid: true, skipBuildNumber: true }, context);
@@ -270,6 +277,13 @@ describe('Publish', () => {
         CFBundleDisplayName: 'My App',
         CFBundleShortVersionString: '1.2.3',
         CFBundleVersion: '100',
+      });
+
+      expect(buildConfig.patch).toHaveBeenCalledTimes(1);
+      expect(buildConfig.patch).toHaveBeenCalledWith({
+        buildSettings: {
+          MARKETING_VERSION: '1.2.3',
+        },
       });
     });
 
@@ -300,31 +314,43 @@ describe('Publish', () => {
     });
 
     it.each`
-      previousVersion  | expectedVersion
-      ${'1'}           | ${'1.1.1'}
-      ${'1000'}        | ${'1000.1.1'}
-      ${'1000.1'}      | ${'1000.1.1'}
-      ${'1000.1.1'}    | ${'1000.1.2'}
-      ${'1000.1.99'}   | ${'1000.2.1'}
-      ${'1000.99.99'}  | ${'1001.1.1'}
-      ${'12345'}       | ${'12345.1.1'}
-      ${'0.0.1'}       | ${'1.1.1'}
-      ${'100.100.100'} | ${'101.1.1'}
+    previousBundleVersion  | expectedBundleVersion
+      ${'1'}               | ${'1.1.1'}
+      ${'1000'}            | ${'1000.1.1'}
+      ${'1000.1'}          | ${'1000.1.1'}
+      ${'1000.1.1'}        | ${'1000.1.2'}
+      ${'1000.1.99'}       | ${'1000.2.1'}
+      ${'1000.99.99'}      | ${'1001.1.1'}
+      ${'12345'}           | ${'12345.1.1'}
+      ${'0.0.1'}           | ${'1.1.1'}
+      ${'100.100.100'}     | ${'101.1.1'}
     `(
-      'sets the CFBundleVersion to $expectedVersion from $previousVersion',
-      async ({ previousVersion, expectedVersion }) => {
+      'sets the CFBundleVersion to $previousBundleVersion from $expectedBundleVersion',
+      async ({ previousBundleVersion, expectedBundleVersion }) => {
         const context = createContext();
 
         (plist.parse as jest.Mock).mockReturnValue({
-          CFBundleVersion: previousVersion,
+          CFBundleVersion: previousBundleVersion,
         });
+
+        getBuildSetting.mockImplementation((value: string) => ({
+          INFOPLIST_FILE: { text: 'Test/Info.plist' },
+          CURRENT_PROJECT_VERSION: { text: previousBundleVersion },
+        }[value]));
 
         await publish({ skipAndroid: true }, context);
 
         expect(plist.build).toHaveBeenCalledTimes(1);
         expect((plist.build as jest.Mock).mock.calls[0][0].CFBundleVersion).toBe(
-          expectedVersion,
+          expectedBundleVersion,
         );
+
+        expect(buildConfig.patch).toHaveBeenCalledTimes(1);
+        expect(buildConfig.patch).toHaveBeenCalledWith({
+          buildSettings: {
+            CURRENT_PROJECT_VERSION: expectedBundleVersion,
+          },
+        });
       },
     );
 
@@ -337,7 +363,7 @@ describe('Publish', () => {
       ${'1.2.3-alpha.2'}    | ${'1.1.1a1'}          | ${'1.1.2a2'}
       ${'1.2.3-beta.1'}     | ${'1.1.1a1'}          | ${'1.1.2b1'}
     `(
-      'sets the CFBundleVersion to $expectedBundleVersion for version $version',
+      'sets the bundle version to $expectedBundleVersion for version $version',
       async ({ version, previousBundleVersion, expectedBundleVersion }) => {
         const context = createContext({ version });
 
@@ -345,12 +371,27 @@ describe('Publish', () => {
           CFBundleVersion: previousBundleVersion,
         });
 
+        getBuildSetting.mockImplementation((value: string) => ({
+          INFOPLIST_FILE: { text: 'Test/Info.plist' },
+          CURRENT_PROJECT_VERSION: { text: previousBundleVersion },
+          MARKETING_VERSION: { text: '1.1.1' },
+        }[value]));
+
         await publish({ skipAndroid: true }, context);
 
         expect(plist.build).toHaveBeenCalledTimes(1);
-        expect((plist.build as jest.Mock).mock.calls[0][0].CFBundleVersion).toBe(
-          expectedBundleVersion,
-        );
+        expect(plist.build).toHaveBeenCalledWith({
+          CFBundleShortVersionString: '1.2.3',
+          CFBundleVersion: expectedBundleVersion,
+        });
+
+        expect(buildConfig.patch).toHaveBeenCalledTimes(1);
+        expect(buildConfig.patch).toHaveBeenCalledWith({
+          buildSettings: {
+            CURRENT_PROJECT_VERSION: expectedBundleVersion,
+            MARKETING_VERSION: '1.2.3',
+          },
+        });
       },
     );
 
@@ -361,18 +402,35 @@ describe('Publish', () => {
         CFBundleVersion: '1.1.1',
       });
 
+      getBuildSetting.mockImplementation((value: string) => ({
+        INFOPLIST_FILE: { text: 'Test/Info.plist' },
+        CURRENT_PROJECT_VERSION: { text: '1.1.1' },
+      }[value]));
+
       await publish({ skipAndroid: true, noPrerelease: true }, context);
 
       expect(plist.build).toHaveBeenCalledTimes(1);
       expect((plist.build as jest.Mock).mock.calls[0][0].CFBundleVersion).toBe(
         '1.1.2',
       );
+
+      expect(buildConfig.patch).toHaveBeenCalledTimes(1);
+      expect(buildConfig.patch).toHaveBeenCalledWith({
+        buildSettings: {
+          CURRENT_PROJECT_VERSION: '1.1.2',
+        },
+      });
     });
 
     it('ignores any variables against the CFBundleVersion', async () => {
       (plist.parse as jest.Mock).mockReturnValue({
         CFBundleVersion: '$(CURRENT_PROJECT_VERSION)',
       });
+
+      getBuildSetting.mockImplementation((value: string) => ({
+        INFOPLIST_FILE: { text: 'Test/Info.plist' },
+        CURRENT_PROJECT_VERSION: { text: '1.1.1' },
+      }[value]));
 
       const context = createContext();
 
@@ -387,6 +445,13 @@ describe('Publish', () => {
       expect(logger.info).toHaveBeenCalledWith(
         'Not updating iOS Test/Info.plist CFBundleVersion as it is the variable "$(CURRENT_PROJECT_VERSION)"',
       );
+
+      expect(buildConfig.patch).toHaveBeenCalledTimes(1);
+      expect(buildConfig.patch).toHaveBeenCalledWith({
+        buildSettings: {
+          CURRENT_PROJECT_VERSION: '1.1.2',
+        },
+      });
     });
   });
 });

@@ -133,3 +133,14 @@ we fall back to the letter `f`. For example, if the next bundle version is
 
 If you want to opt out of this behaviour and strip pre-releases for both
 Android and iOS you can use the `noPrerelease` option.
+
+### Xcode project files
+
+To help accommodate projects that use Xcode to manage their versioning this plugin
+will update the `CURRENT_PROJECT_VERSION` in the same way as the `CFBundleVersion`
+and the `MARKETING_VERSION` in the same was as the `CFBundleShortVersionString`.
+If these variables are not present in the first place then nothing will be added.
+
+Whether or not you choose to commit these updates is up to you. If you are not
+actually using these variables in your `Info.plist` files then they are probably
+redundant anyway.

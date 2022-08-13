@@ -43,9 +43,9 @@ const stripPrereleaseVersion = (version: string) => {
 };
 
 /**
- * Get a build number for iOS.
+ * Get a build version for iOS.
  */
-const getCfBundleVersion = (previousBundleVersion: string, version: string) => {
+const getIosBundleVersion = (previousBundleVersion: string, version: string) => {
   const [majorStr, minorStr, patchStr] = previousBundleVersion.split('.');
   let major = parseInt(majorStr ?? 0, 10);
   let minor = parseInt(minorStr ?? 0, 10);
@@ -157,10 +157,10 @@ const getPlistFilenames = (xcode: Xcode) => unique(
     xcode.document.projects.map((project) => (
       project.targets.filter(Boolean).map((target) => (
         target.buildConfigurationsList.buildConfigurations.map((config) => (
-          config.ast.value.get('buildSettings').get('INFOPLIST_FILE').text
+          config.ast.value.get('buildSettings').get('INFOPLIST_FILE')?.text
         )))))),
   ),
-);
+).filter((x) => x);
 
 /**
  * Increment the build number in all Xcode projects.
@@ -168,9 +168,12 @@ const getPlistFilenames = (xcode: Xcode) => unique(
 const incrementPbxProjectBuildNumbers = (
   xcode: Xcode,
   logger: Context['logger'],
-  iosPackageName?: string,
+  version: string,
+  pluginConfig: PluginConfig,
 ) => {
   const currentProjectVersionKey = 'CURRENT_PROJECT_VERSION';
+  const marketingVersionKey = 'MARKETING_VERSION';
+  const { iosPackageName, skipBuildNumber } = pluginConfig;
 
   xcode.document.projects.forEach((project) => {
     const validTargets = project.targets.filter(Boolean);
@@ -181,28 +184,43 @@ const incrementPbxProjectBuildNumbers = (
       ));
 
       validBuildConfigs.forEach((buildConfig) => {
-        const currentBuildNumber = parseInt(
-          buildConfig.ast.value
-            .get('buildSettings')
-            .get(currentProjectVersionKey)?.text,
-          10,
-        );
+        const currentProjectVersion = buildConfig.ast.value
+          .get('buildSettings')
+          .get(currentProjectVersionKey)?.text;
 
-        if (!currentBuildNumber) {
-          return;
+        const currentMarketingVersion = buildConfig.ast.value
+          .get('buildSettings')
+          .get(marketingVersionKey)?.text;
+
+        const buildSettings = {};
+
+        if (currentMarketingVersion) {
+          const newMarketingVersion = stripPrereleaseVersion(version);
+
+          Object.assign(buildSettings, {
+            [marketingVersionKey]: newMarketingVersion,
+          });
+
+          logger.success(
+            `iOS ${target.name} ${marketingVersionKey} > ${newMarketingVersion}`,
+          );
         }
 
-        const newBuildNumber = currentBuildNumber + 1;
+        if (currentProjectVersion && !skipBuildNumber) {
+          const newProjectVersion = getIosBundleVersion(String(currentProjectVersion), version);
 
-        buildConfig.patch({
-          buildSettings: {
-            [currentProjectVersionKey]: newBuildNumber,
-          },
-        });
+          Object.assign(buildSettings, {
+            [currentProjectVersionKey]: newProjectVersion,
+          });
 
-        logger.success(
-          `iOS ${target.name} ${currentProjectVersionKey} > ${newBuildNumber}`,
-        );
+          logger.success(
+            `iOS ${target.name} ${currentProjectVersionKey} > ${newProjectVersion}`,
+          );
+        }
+
+        if (Object.keys(buildSettings).length) {
+          buildConfig.patch({ buildSettings });
+        }
       });
     });
   });
@@ -227,7 +245,7 @@ const updateCfBundleVersion = (
   logger: Context['logger'],
 ) => {
   const currentBuildVersion = plistObj.CFBundleVersion ? String(plistObj.CFBundleVersion) : '';
-  const newBuildVersion = getCfBundleVersion(currentBuildVersion, version);
+  const newBuildVersion = getIosBundleVersion(currentBuildVersion, version);
 
   if (currentBuildVersion.startsWith('$(')) {
     logger.info(
@@ -322,9 +340,7 @@ const versionIos = (
   const projectFolder = path.join(iosPath, xcodeProjects[0]);
   const xcode = Xcode.open(path.join(projectFolder, 'project.pbxproj'));
 
-  if (!pluginConfig.skipBuildNumber) {
-    incrementPbxProjectBuildNumbers(xcode, logger, pluginConfig.iosPackageName);
-  }
+  incrementPbxProjectBuildNumbers(xcode, logger, version, pluginConfig);
 
   incrementPlistVersions(pluginConfig, xcode, iosPath, version, logger);
 };
