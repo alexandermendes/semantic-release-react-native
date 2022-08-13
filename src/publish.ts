@@ -1,8 +1,9 @@
 import type { Context } from 'semantic-release';
+import deepmerge from 'deepmerge';
 import type { FullPluginConfig, PluginConfig } from './types';
 import { versionAndroid, versionIos } from './version';
 
-const applyPluginConfigDefaults = (pluginConfig: PluginConfig): FullPluginConfig => ({
+const applyPluginConfigDefaults = (pluginConfig: PluginConfig): FullPluginConfig => deepmerge({
   androidPath: 'android/app/build.gradle',
   iosPath: 'ios',
   iosPackageName: null,
@@ -10,8 +11,15 @@ const applyPluginConfigDefaults = (pluginConfig: PluginConfig): FullPluginConfig
   skipAndroid: false,
   skipIos: false,
   noPrerelease: false,
-  ...pluginConfig,
-});
+  versionStrategy: {
+    android: {
+      buildNumber: 'increment',
+    },
+    ios: {
+      buildNumber: 'strict',
+    },
+  },
+}, pluginConfig);
 
 export const publish = async (
   pluginConfig: PluginConfig,

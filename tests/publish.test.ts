@@ -13,6 +13,7 @@ const logger = {
   log: jest.fn(),
   info: jest.fn(),
   success: jest.fn(),
+  warn: jest.fn(),
   error: jest.fn(),
 } as unknown as Context['logger'];
 
@@ -178,6 +179,238 @@ describe('Publish', () => {
 
       expect(fs.readFileSync).toHaveBeenCalledTimes(1);
       expect(fs.readFileSync).toHaveBeenCalledWith(androidPath);
+    });
+
+    it.each`
+      version       | expectedVersionCode
+      ${'1.0.0'}    | ${'100000'}
+      ${'1.12.1'}   | ${'101210'}
+      ${'99.99.99'} | ${'999999'}
+    `(
+      'updates the versionCode to $expectedVersionCode for version $version when using the semantic strategy',
+      async ({ version, expectedVersionCode }) => {
+        const context = createContext({ version });
+
+        await publish({
+          skipIos: true,
+          versionStrategy: {
+            android: {
+              buildNumber: 'semantic',
+            },
+          },
+        }, context);
+
+        expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+          `versionName "${version}"`,
+          `versionCode ${expectedVersionCode}`,
+        ].join('\n'));
+      },
+    );
+
+    it.each`
+      minSdkVersion | expectedVersionCode
+      ${'1'}        | ${'010102030'}
+      ${'24'}       | ${'240102030'}
+    `(
+      'updates the versionCode using the semantic-extended strategy when the min SDK version is $minSdkVersion',
+      async ({ minSdkVersion, expectedVersionCode }) => {
+        const context = createContext();
+
+        (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
+          if (filePath.endsWith('build.gradle')) {
+            return [
+              `minSdkVersion ${minSdkVersion}`,
+              'versionName "1.0.0"',
+              'versionCode 100',
+            ].join('\n');
+          }
+
+          return null;
+        });
+
+        await publish({
+          skipIos: true,
+          versionStrategy: {
+            android: {
+              buildNumber: 'semantic-extended',
+            },
+          },
+        }, context);
+
+        expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+          `minSdkVersion ${minSdkVersion}`,
+          'versionName "1.2.3"',
+          `versionCode ${expectedVersionCode}`,
+        ].join('\n'));
+      },
+    );
+
+    it.each([
+      '100.0.0',
+      '1.100.0',
+      '1.0.100',
+    ])('handles updating the versionCode using the semantic strategy when we reach version %s', async (version) => {
+      const context = createContext({ version });
+
+      (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
+        if (filePath.endsWith('build.gradle')) {
+          return [
+            'versionName "1.0.0"',
+            'versionCode 100',
+          ].join('\n');
+        }
+
+        return null;
+      });
+
+      await publish({
+        skipIos: true,
+        versionStrategy: {
+          android: {
+            buildNumber: 'semantic',
+          },
+        },
+      }, context);
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+        `versionName "${version}"`,
+        'versionCode 100',
+      ].join('\n'));
+
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Could not update Android versionCode using the semantic strategy '
+        + 'as the numbers in your semantic version exceed two digits. It is '
+        + 'recommended that you switch to the increment strategy (see plugin docs).',
+      );
+    });
+
+    it('handles updating the versionCode using the semantic-extended strategy when the minSdkVersion is missing', async () => {
+      const context = createContext();
+
+      (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
+        if (filePath.endsWith('build.gradle')) {
+          return [
+            'versionName "1.0.0"',
+            'versionCode 100',
+          ].join('\n');
+        }
+
+        return null;
+      });
+
+      await publish({
+        skipIos: true,
+        versionStrategy: {
+          android: {
+            buildNumber: 'semantic-extended',
+          },
+        },
+      }, context);
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+        'versionName "1.2.3"',
+        'versionCode 100',
+      ].join('\n'));
+
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Could not update Android versionCode using the semantic-extended strategy '
+        + 'as the minSdkVersion could not be determined.',
+      );
+    });
+
+    it('handles updating the versionCode using the semantic-extended strategy when the minSdkVersion is a variable', async () => {
+      const context = createContext();
+
+      (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
+        if (filePath.endsWith('build.gradle')) {
+          return [
+            'minSdkVersion project.ext.minSdkVersion',
+            'versionName "1.0.0"',
+            'versionCode 100',
+          ].join('\n');
+        }
+
+        return null;
+      });
+
+      await publish({
+        skipIos: true,
+        versionStrategy: {
+          android: {
+            buildNumber: 'semantic-extended',
+          },
+        },
+      }, context);
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+        'minSdkVersion project.ext.minSdkVersion',
+        'versionName "1.2.3"',
+        'versionCode 100',
+      ].join('\n'));
+
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Could not update Android versionCode using the semantic-extended strategy '
+        + 'as the minSdkVersion could not be determined.',
+      );
+    });
+
+    it('handles updating the versionCode using the semantic-extended strategy when the minSdkVersion is 100', async () => {
+      const context = createContext();
+
+      (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
+        if (filePath.endsWith('build.gradle')) {
+          return [
+            'minSdkVersion 100',
+            'versionName "1.0.0"',
+            'versionCode 100',
+          ].join('\n');
+        }
+
+        return null;
+      });
+
+      await publish({
+        skipIos: true,
+        versionStrategy: {
+          android: {
+            buildNumber: 'semantic-extended',
+          },
+        },
+      }, context);
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+        'minSdkVersion 100',
+        'versionName "1.2.3"',
+        'versionCode 100',
+      ].join('\n'));
+
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Could not update Android versionCode using the semantic-extended strategy '
+        + 'as the minSdkVersion is greater than 99. Welcome to the future. Have the '
+        + 'robots taken over yet?',
+      );
+    });
+
+    it('does not update versionCode using the none strategy', async () => {
+      const context = createContext();
+
+      await publish({
+        skipIos: true,
+        versionStrategy: {
+          android: {
+            buildNumber: 'none',
+          },
+        },
+      }, context);
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+        'versionName "1.2.3"',
+        'versionCode 100',
+      ].join('\n'));
     });
   });
 

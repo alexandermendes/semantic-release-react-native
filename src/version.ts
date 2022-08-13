@@ -43,6 +43,31 @@ const stripPrereleaseVersion = (version: string) => {
 };
 
 /**
+ * Get a build number that is relative to the semantic version.
+ *
+ * For example, v1.2.3 becomes 102030.
+ */
+const getSemanticBuildNumber = (version: string, logger: Context['logger']) => {
+  const major = String(semver.major(version)).padEnd(2, '0');
+  const minor = String(semver.minor(version)).padEnd(2, '0');
+  const patch = String(semver.patch(version)).padEnd(2, '0');
+
+  const semanticBuildNumber = `${major}${minor}${patch}`;
+
+  if (major.length > 2 || minor.length > 2 || patch.length > 2) {
+    logger.warn(
+      'Could not update Android versionCode using the semantic strategy '
+      + 'as the numbers in your semantic version exceed two digits. It is '
+      + 'recommended that you switch to the increment strategy (see plugin docs).',
+    );
+
+    return null;
+  }
+
+  return semanticBuildNumber;
+};
+
+/**
  * Get a build version for iOS.
  */
 const getIosBundleVersion = (previousBundleVersion: string, version: string) => {
@@ -292,6 +317,62 @@ const getVersion = (noPrerelease: boolean, nextRelease?: NextRelease) => {
 };
 
 /**
+ * Get the next version code for Android according to the chosen strategy.
+ */
+const getNextAndroidVersionCode = (
+  strategy: FullPluginConfig['versionStrategy']['android'],
+  logger: Context['logger'],
+  version: string,
+  currentVersionCode: string,
+  minSdkVersion?: string,
+) => {
+  if (strategy?.buildNumber === 'none') {
+    return currentVersionCode;
+  }
+
+  if (strategy?.buildNumber === 'semantic') {
+    const semanticBuildNumber = getSemanticBuildNumber(version, logger);
+
+    if (!semanticBuildNumber) {
+      return currentVersionCode;
+    }
+
+    return semanticBuildNumber;
+  }
+
+  if (strategy?.buildNumber === 'semantic-extended') {
+    if (!minSdkVersion) {
+      logger.warn(
+        'Could not update Android versionCode using the semantic-extended strategy '
+        + 'as the minSdkVersion could not be determined.',
+      );
+
+      return currentVersionCode;
+    }
+
+    if (minSdkVersion.length > 2) {
+      logger.warn(
+        'Could not update Android versionCode using the semantic-extended strategy '
+        + 'as the minSdkVersion is greater than 99. Welcome to the future. Have the '
+        + 'robots taken over yet?',
+      );
+
+      return currentVersionCode;
+    }
+
+    const semanticBuildNumber = getSemanticBuildNumber(version, logger);
+
+    if (!semanticBuildNumber) {
+      return currentVersionCode;
+    }
+
+    return `${minSdkVersion.padStart(2, '0')}0${semanticBuildNumber}`;
+  }
+
+  return String(parseInt(currentVersionCode, 10) + 1);
+};
+
+/**
  * Version iOS files.
  */
 export const versionIos = (
@@ -364,8 +445,16 @@ export const versionAndroid = (
   logger.success(`Android versionName > ${version}`);
 
   if (!pluginConfig.skipBuildNumber) {
+    const [, minSdkVersion] = gradleFile.match(/minSdkVersion (\d+)/) || [];
+
     gradleFile = gradleFile.replace(/versionCode (\d+)/, (_match, currentVersionCode) => {
-      newBuildNumber = String(parseInt(currentVersionCode, 10) + 1);
+      newBuildNumber = getNextAndroidVersionCode(
+        pluginConfig.versionStrategy.android,
+        logger,
+        version,
+        currentVersionCode,
+        minSdkVersion,
+      );
 
       return `versionCode ${newBuildNumber}`;
     });
