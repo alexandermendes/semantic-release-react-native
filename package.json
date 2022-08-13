@@ -30,6 +30,13 @@
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
+  "keywords": [
+    "semantic-release",
+    "react-native",
+    "version",
+    "release",
+    "publish"
+  ],
   "peerDependencies": {
     "semantic-release": "*"
   },
