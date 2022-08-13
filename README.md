@@ -186,8 +186,11 @@ Disable updates of the `CFBundleVersion`.
 
 ## Pre-releases
 
-Pre-release versions present to major challenges for Android, but iOS again gets
+Pre-release versions present no major challenges for Android, but iOS again gets
 a little more complicated.
+
+If you want to opt out of the behaviour described below and strip pre-releases
+for both Android and iOS you can use the `noPrerelease` option.
 
 ### Android
 
@@ -219,8 +222,8 @@ we fall back to the letter `f`. For example, if the next bundle version is
 - `1.2.3-feature.42` > `1000.1.1f42`
 - `1.2.3-hello.1` > `1000.1.1f1`
 
-If you want to opt out of this behaviour and strip pre-releases for both
-Android and iOS you can use the `noPrerelease` option.
+Note that this feature only works when using the `strict` versioning strategy
+for iOS (which is the default).
 
 ## Xcode project files
 
