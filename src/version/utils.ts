@@ -21,16 +21,20 @@ export const stripPrereleaseVersion = (version: string) => {
  *
  * For example, v1.2.3 becomes 102030.
  */
-export const getSemanticBuildNumber = (version: string, logger: Context['logger']) => {
-  const major = String(semver.major(version)).padEnd(2, '0');
-  const minor = String(semver.minor(version)).padEnd(2, '0');
-  const patch = String(semver.patch(version)).padEnd(2, '0');
+export const getSemanticBuildNumber = (
+  version: string,
+  logger: Context['logger'],
+  platform: 'Android' | 'iOS',
+) => {
+  const major = String(semver.major(version)).padStart(2, '0');
+  const minor = String(semver.minor(version)).padStart(2, '0');
+  const patch = String(semver.patch(version)).padStart(2, '0');
 
   const semanticBuildNumber = `${major}${minor}${patch}`;
 
   if (major.length > 2 || minor.length > 2 || patch.length > 2) {
     logger.warn(
-      'Could not update Android versionCode using the semantic strategy '
+      `Could not update ${platform} bundle version using the semantic strategy `
       + 'as the numbers in your semantic version exceed two digits. It is '
       + 'recommended that you switch to the increment strategy (see plugin docs).',
     );

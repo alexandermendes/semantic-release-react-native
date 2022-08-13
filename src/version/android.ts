@@ -29,7 +29,7 @@ const getNextAndroidVersionCode = (
   }
 
   if (strategy?.buildNumber === 'semantic') {
-    const semanticBuildNumber = getSemanticBuildNumber(version, logger);
+    const semanticBuildNumber = getSemanticBuildNumber(version, logger, 'Android');
 
     if (!semanticBuildNumber) {
       return currentVersionCode;
@@ -58,7 +58,7 @@ const getNextAndroidVersionCode = (
       return currentVersionCode;
     }
 
-    const semanticBuildNumber = getSemanticBuildNumber(version, logger);
+    const semanticBuildNumber = getSemanticBuildNumber(version, logger, 'Android');
 
     if (!semanticBuildNumber) {
       return currentVersionCode;

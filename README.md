@@ -43,11 +43,11 @@ The example configuration above will version and git commit your native files.
 
 ## Configuration
 
-| Property                 | Description                                                 | Default                    |
+| Property          | Description                                                        | Default                    |
 |-------------------|--------------------------------------------------------------------|----------------------------|
 | `androidPath`     | Path to your "android/app/build.gradle" file.                      | `android/app/build.gradle` |
 | `iosPath`         | Path to your "ios/" folder.                                        | `ios`                      |
-| `skipBuildNumber` | Do not increment the build number.                                 | `false`                    |
+| `skipBuildNumber` | Do not increment the build number for either platform.             | `false`                    |
 | `skipAndroid`     | Skip Android versioning.                                           | `false`                    |
 | `skipIos`         | Skip iOS versioning.                                               | `false`                    |
 | `iosPackageName`  | Only update iOS projects that have the given name.                 | `null`                     |
@@ -101,15 +101,16 @@ It auto-increments the current `versionCode` by one for every release.
 #### `semantic`
 
 Update the `versionCode` in-line with the next semantic version. For example,
-`v10.25.3` becomes `102530`.
+`v1.25.3` becomes `012503`, with each number in the semantic release version
+converted to two digits and the start of each number padded with zeros as necessary.
 
 The downside to this approach is that it effectively breaks when we hit MINOR
 or PATCH versions greater than 99. When we get to version `v1.100.1`, for example,
 we would have to make a decision about whether or not we allow three digits, in
-which case this becomes `1010010` and will break when we release version `2.0.0`
-(as `1010010` > `200000`). Or we could choose to only allow two digits and strip
+which case this becomes `0110001` and will break when we release version `2.0.0`
+(as `1010001` > `020000`). Or we could choose to only allow two digits and strip
 the first, in which case this will break when we release version `v1.101.1`
-(as in both cases the `versionCode` would equal `101010`).
+(as in both cases the `versionCode` would equal `011001`).
 
 If you think you are unlikely to have 100 MINOR or PATCH versions then go ahead
 and use this strategy.
@@ -169,16 +170,15 @@ hopefully Apple won't complain!
 
 #### `increment`
 
-Simply auto-increment the version number by one.
+This strategy behaves the same as the `increment` strategy for Android.
 
-This strategy is the same as the default `increment` strategy used for Android,
-so if you would like to keep your version numbers in sync across platforms and
-aren't concerned with any of the risks around In App Purchases described above,
-then go ahead and use it.
+Note the potential risks around In App Purchases described above.
 
 #### `semantic`
 
-See the description of the `semantic` strategy for Android, this is the same thing.
+This strategy behaves the same as the `semantic` strategy for Android.
+
+Again, note the potential risks around In App Purchases described above.
 
 #### `none`
 
