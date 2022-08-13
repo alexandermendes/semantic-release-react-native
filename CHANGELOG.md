@@ -1,3 +1,17 @@
+# [1.3.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.2.0...v1.3.0) (2022-08-13)
+
+
+### Bug Fixes
+
+* do not rely on CURRENT_PROJECT_VERSION existing ([d2ef7fa](https://github.com/alexandermendes/semantic-release-react-native/commit/d2ef7fa190dba860fce23cd5c1ac0ff312397257))
+* pre-release strategy ([6fbd54e](https://github.com/alexandermendes/semantic-release-react-native/commit/6fbd54e3921294703435328fcf22c431a7a77ce8))
+
+
+### Features
+
+* add more robust ios versioning strategy ([655e953](https://github.com/alexandermendes/semantic-release-react-native/commit/655e953f0b860eec7b078a66190c4f5b70acf3dd))
+* add pre-release strategy ([e1b806a](https://github.com/alexandermendes/semantic-release-react-native/commit/e1b806a2473d614cd92fe7428ae65b58799dafa6))
+
 # [1.2.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.1.0...v1.2.0) (2022-08-13)
 
 
