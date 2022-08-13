@@ -52,7 +52,7 @@ The example configuration above will version and git commit your native files.
 | `skipIos`         | Skip iOS versioning.                                               | `false`                    |
 | `iosPackageName`  | Only update iOS projects that have the given name.                 | `null`                     |
 | `noPrerelease`    | Skip pre-release versions entirely for both platforms.             | `false`                    |
-| `versionStrategy` | Specifies the versioning strategies for each platform (see below). | `{"android": {"buildNumber": "increment", "preRelease": "semantic"}, "ios": {"buildNumber": "strict", "preRelease": "strict"}}` |
+| `versionStrategy` | Specifies the versioning strategies for each platform (see below). | `{"android": {"buildNumber": "increment", "preRelease": true}, "ios": {"buildNumber": "strict", "preRelease": true}}` |
 
 ## Versioning strategies
 
