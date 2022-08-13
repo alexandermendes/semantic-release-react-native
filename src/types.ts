@@ -5,4 +5,5 @@ export type PluginConfig = {
   skipBuildNumber?: boolean;
   skipAndroid?: boolean;
   skipIos?: boolean;
+  noPrerelease?: boolean;
 };

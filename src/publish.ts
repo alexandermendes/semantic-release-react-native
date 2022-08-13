@@ -28,13 +28,13 @@ const getIosPath = (iosPath?: string) => {
 };
 
 /**
- * Get the version number for iOS.
+ * Strip any pre-release label from a version (e.g. 1.2.3-beta.1).
  *
  * iOS do not accept pre-release versions against CFBundleShortVersionString.
  *
  * @see https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleshortversionstring
  */
-const getIosVersion = (version: string) => {
+const stripPrereleaseVersion = (version: string) => {
   const major = semver.major(version);
   const minor = semver.minor(version);
   const patch = semver.patch(version);
@@ -178,7 +178,7 @@ const incrementPlistVersions = (
       return;
     }
 
-    const shortVersion = getIosVersion(version);
+    const shortVersion = stripPrereleaseVersion(version);
 
     Object.assign(plistObj, {
       CFBundleShortVersionString: shortVersion,
@@ -247,7 +247,11 @@ export const publish = async (
     return;
   }
 
-  const { version } = nextRelease;
+  let { version } = nextRelease;
+
+  if (pluginConfig.noPrerelease) {
+    version = stripPrereleaseVersion(version);
+  }
 
   if (!pluginConfig.skipAndroid) {
     versionAndroid(version, pluginConfig, context);

@@ -142,6 +142,17 @@ describe('Publish', () => {
       ].join('\n'));
     });
 
+    it('strips a prerelease version if noPrerelease option given', async () => {
+      const context = createContext({ version: '1.2.3-beta.1' });
+
+      await publish({ skipIos: true, noPrerelease: true }, context);
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+        'versionName "1.2.3"',
+        'versionCode 101',
+      ].join('\n'));
+    });
+
     it('loads a build.gradle from a custom path', async () => {
       const context = createContext();
       const androidPath = 'src/android/build.gradle';
