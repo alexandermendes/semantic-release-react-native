@@ -1,7 +1,7 @@
 /* eslint-disable import/no-unresolved */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
-const { verify: verifyRn, publish: publishRn } = require('./dist/index');
+const { verifyConditons: verifyRn, publish: publishRn } = require('./dist/index');
 
 let verified;
 
@@ -21,4 +21,4 @@ const publish = async (pluginConfig, context) => {
   return publishRn(pluginConfig, context);
 };
 
-module.exports = { verifyConditions };
+module.exports = { verifyConditions, publish };
