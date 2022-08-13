@@ -5,10 +5,10 @@
 A [Semantic Release](https://github.com/semantic-release/semantic-release) plugin
 for versioning [React Native](https://reactnative.dev/) applications.
 
-| Step               | Description                                                            |
-|--------------------|------------------------------------------------------------------------|
-| `verifyConditions` | Verify that the configuration is valid.                                |
-| `publish`          | Update the relevant iOS and Android files with the new version number. |
+| Step               | Description                           |
+|--------------------|---------------------------------------|
+| `verifyConditions` | Validate configuration.               |
+| `publish`          | Version native iOS and Android files. |
 
 ## Installation
 
