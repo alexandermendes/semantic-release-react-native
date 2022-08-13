@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.3.2...v1.3.3) (2022-08-13)
+
+
+### Bug Fixes
+
+* logging of new bundle version ([2bcdc64](https://github.com/alexandermendes/semantic-release-react-native/commit/2bcdc642f676dccdd0e553139b09abcd8b3cea28))
+
 ## [1.3.2](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.3.1...v1.3.2) (2022-08-13)
 
 
