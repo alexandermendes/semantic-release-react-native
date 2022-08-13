@@ -352,5 +352,40 @@ describe('Publish', () => {
         );
       },
     );
+
+    it('strips a prerelease version if noPrerelease option given', async () => {
+      const context = createContext({ version: '1.2.3-alpha.1' });
+
+      (plist.parse as jest.Mock).mockReturnValue({
+        CFBundleVersion: '1.1.1',
+      });
+
+      await publish({ skipAndroid: true, noPrerelease: true }, context);
+
+      expect(plist.build).toHaveBeenCalledTimes(1);
+      expect((plist.build as jest.Mock).mock.calls[0][0].CFBundleVersion).toBe(
+        '1.1.2',
+      );
+    });
+
+    it('ignores any variables against the CFBundleVersion', async () => {
+      (plist.parse as jest.Mock).mockReturnValue({
+        CFBundleVersion: '$(CURRENT_PROJECT_VERSION)',
+      });
+
+      const context = createContext();
+
+      await publish({ skipAndroid: true }, context);
+
+      expect(plist.build).toHaveBeenCalledTimes(1);
+      expect(plist.build).toHaveBeenCalledWith({
+        CFBundleShortVersionString: '1.2.3',
+        CFBundleVersion: '$(CURRENT_PROJECT_VERSION)',
+      });
+
+      expect(logger.info).toHaveBeenCalledWith(
+        'Not updating iOS Test/Info.plist CFBundleVersion as it is the variable "$(CURRENT_PROJECT_VERSION)"',
+      );
+    });
   });
 });

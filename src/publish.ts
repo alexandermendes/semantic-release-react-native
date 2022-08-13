@@ -213,6 +213,30 @@ const isPlistObject = (value: PlistValue): value is PlistObject => (
   typeof (value as PlistObject) === 'object'
 );
 
+const updateCfBundleVersion = (
+  plistFilename: string,
+  plistObj: PlistObject,
+  version: string,
+  logger: Context['logger'],
+) => {
+  const currentBuildVersion = String(plistObj.CFBundleVersion);
+  const newBuildVersion = getCfBundleVersion(currentBuildVersion, version);
+
+  if (currentBuildVersion.startsWith('$(')) {
+    logger.info(
+      `Not updating iOS ${plistFilename} CFBundleVersion as it is the variable "${currentBuildVersion}"`,
+    );
+
+    return;
+  }
+
+  Object.assign(plistObj, {
+    CFBundleVersion: newBuildVersion,
+  });
+
+  logger.success(`iOS ${plistFilename} CFBundleVersion > ${newBuildVersion}`);
+};
+
 /**
  * Increment version numbers in all plist files.
  */
@@ -245,14 +269,7 @@ const incrementPlistVersions = (
     logger.success(`iOS ${plistFilename} CFBundleShortVersionString > ${shortVersion}`);
 
     if (!pluginConfig.skipBuildNumber && plistObj.CFBundleVersion) {
-      const currentBuildVersion = String(plistObj.CFBundleVersion);
-      const newBuildVersion = getCfBundleVersion(currentBuildVersion, version);
-
-      Object.assign(plistObj, {
-        CFBundleVersion: newBuildVersion,
-      });
-
-      logger.success(`iOS ${plistFilename} CFBundleVersion > ${newBuildVersion}`);
+      updateCfBundleVersion(plistFilename, plistObj, version, logger);
     }
 
     fs.writeFileSync(path.join(iosPath, plistFilename), plist.build(plistObj));
