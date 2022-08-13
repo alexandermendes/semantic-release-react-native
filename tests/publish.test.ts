@@ -233,7 +233,7 @@ describe('Publish', () => {
       expect(plist.build).toHaveBeenCalledWith({
         CFBundleDisplayName: 'My App',
         CFBundleShortVersionString: '1.2.3',
-        CFBundleVersion: '101',
+        CFBundleVersion: '100.1.1',
       });
 
       expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
@@ -298,7 +298,7 @@ describe('Publish', () => {
       );
     });
 
-    it.only.each`
+    it.each`
       previousVersion  | expectedVersion
       ${'1'}           | ${'1.1.1'}
       ${'1000'}        | ${'1000.1.1'}
