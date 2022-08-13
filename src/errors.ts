@@ -5,7 +5,7 @@ type ErrorCodes = 'ENRNANDROIDPATH' | 'ENRNIOSPATH';
 type ErrorDefinition = {
   message: string;
   details: string;
-}
+};
 
 const ERROR_DEFINITIONS: Record<ErrorCodes, ErrorDefinition> = {
   ENRNANDROIDPATH: {

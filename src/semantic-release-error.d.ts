@@ -8,7 +8,7 @@ declare module '@semantic-release/error' {
 
     public semanticRelease: true;
 
-    constructor (message: string, code: string, details: string)
+    constructor(message: string, code: string, details: string);
   }
 
   export = SemanticReleaseError;
