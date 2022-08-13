@@ -2,6 +2,7 @@ import fs from 'fs';
 import { PluginConfig } from './types';
 import { toAbsolutePath } from './paths';
 import { getError } from './errors';
+import { iosVesionStrategies } from './strategies';
 
 const verifyAndroidPath = (androidPath: string) => {
   const absAndroidPath = toAbsolutePath(androidPath);
@@ -60,6 +61,24 @@ export const verifyConditons = (pluginConfig: PluginConfig) => {
     && !(typeof pluginConfig.iosPackageName === 'string' || pluginConfig.iosPackageName instanceof String)
   ) {
     errors.push(getError('iosPackageName', 'ENRNNOTSTRING'));
+  }
+
+  const { ios, android } = pluginConfig.versionStrategy ?? {};
+
+  if (ios?.buildNumber && !iosVesionStrategies.includes(ios.buildNumber)) {
+    errors.push(getError('versionStrategy', 'ENRNVERSIONSTRATEGY'));
+  }
+
+  if (android?.buildNumber && !iosVesionStrategies.includes(android.buildNumber)) {
+    errors.push(getError('versionStrategy', 'ENRNVERSIONSTRATEGY'));
+  }
+
+  if (ios?.preRelease != null && typeof ios.preRelease !== 'boolean') {
+    errors.push(getError('versionStrategy', 'ENRNVERSIONSTRATEGY'));
+  }
+
+  if (android?.preRelease != null && typeof android.preRelease !== 'boolean') {
+    errors.push(getError('versionStrategy', 'ENRNVERSIONSTRATEGY'));
   }
 
   return errors.filter((x) => x);

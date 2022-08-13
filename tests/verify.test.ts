@@ -98,4 +98,66 @@ describe('verifyConditions', () => {
       ]);
     });
   });
+
+  describe('versionStrategy', () => {
+    it('errors if an invalid ios version strategy is given', () => {
+      const errors = verifyConditons({
+        versionStrategy: {
+          ios: {
+            // @ts-ignore
+            buildNumber: 'invalid',
+          },
+        },
+      });
+
+      expect(errors).toEqual([
+        new Error('Invalid versionStrategy'),
+      ]);
+    });
+
+    it('errors if an invalid android version strategy is given', () => {
+      const errors = verifyConditons({
+        versionStrategy: {
+          android: {
+            // @ts-ignore
+            buildNumber: 'invalid',
+          },
+        },
+      });
+
+      expect(errors).toEqual([
+        new Error('Invalid versionStrategy'),
+      ]);
+    });
+
+    it('errors if an invalid ios pre-release strategy is given', () => {
+      const errors = verifyConditons({
+        versionStrategy: {
+          ios: {
+            // @ts-ignore
+            preRelease: 'invalid',
+          },
+        },
+      });
+
+      expect(errors).toEqual([
+        new Error('Invalid versionStrategy'),
+      ]);
+    });
+
+    it('errors if an invalid android pre-release strategy is given', () => {
+      const errors = verifyConditons({
+        versionStrategy: {
+          android: {
+            // @ts-ignore
+            preRelease: 'invalid',
+          },
+        },
+      });
+
+      expect(errors).toEqual([
+        new Error('Invalid versionStrategy'),
+      ]);
+    });
+  });
 });

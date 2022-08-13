@@ -22,7 +22,8 @@ export class SemanticReleaseError extends Error {
 type ErrorCodes = 'ENRNANDROIDPATH'
   | 'ENRNIOSPATH'
   | 'ENRNNOTBOOLEAN'
-  | 'ENRNNOTSTRING';
+  | 'ENRNNOTSTRING'
+  | 'ENRNVERSIONSTRATEGY';
 
 type ErrorDefinition = (key: keyof PluginConfig) => {
   message: string;
@@ -45,6 +46,10 @@ const ERROR_DEFINITIONS: Record<ErrorCodes, ErrorDefinition> = {
   ENRNNOTSTRING: (key: keyof PluginConfig) => ({
     message: `Invalid ${key}`,
     details: `The ${key} must be a string.`,
+  }),
+  ENRNVERSIONSTRATEGY: (key: keyof PluginConfig) => ({
+    message: `Invalid ${key}`,
+    details: `The ${key} must comply with the schema (see docs).`,
   }),
 };
 

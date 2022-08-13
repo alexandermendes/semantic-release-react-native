@@ -1,3 +1,9 @@
+import { androidVesionStrategies, iosVesionStrategies } from './strategies';
+
+type AndroidVersionStrategies = typeof androidVesionStrategies[number];
+
+type IosVersionStrategies = typeof iosVesionStrategies[number];
+
 export type PluginConfig = {
   androidPath?: string;
   iosPath?: string;
@@ -8,11 +14,11 @@ export type PluginConfig = {
   noPrerelease?: boolean;
   versionStrategy?: {
     android?: {
-      buildNumber?: 'increment' | 'relative' | 'relative-extended' | 'none';
+      buildNumber?: AndroidVersionStrategies;
       preRelease?: boolean;
     },
     ios?: {
-      buildNumber?: 'strict' | 'increment' | 'relative' | 'semantic' | 'none';
+      buildNumber?: IosVersionStrategies;
       preRelease?: boolean;
     };
   };
