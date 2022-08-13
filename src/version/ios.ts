@@ -93,7 +93,7 @@ const getIosBundleVersion = (
     return currentBundleVersion;
   }
 
-  if (strategy?.buildNumber === 'semantic') {
+  if (strategy?.buildNumber === 'relative') {
     const semanticBuildNumber = getSemanticBuildNumber(version, logger, 'iOS');
 
     if (!semanticBuildNumber) {

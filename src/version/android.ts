@@ -28,7 +28,7 @@ const getNextAndroidVersionCode = (
     return currentVersionCode;
   }
 
-  if (strategy?.buildNumber === 'semantic') {
+  if (strategy?.buildNumber === 'relative') {
     const semanticBuildNumber = getSemanticBuildNumber(version, logger, 'Android');
 
     if (!semanticBuildNumber) {
@@ -38,10 +38,10 @@ const getNextAndroidVersionCode = (
     return semanticBuildNumber;
   }
 
-  if (strategy?.buildNumber === 'semantic-extended') {
+  if (strategy?.buildNumber === 'relative-extended') {
     if (!minSdkVersion) {
       logger.warn(
-        'Could not update Android versionCode using the semantic-extended strategy '
+        'Could not update Android versionCode using the relative-extended strategy '
         + 'as the minSdkVersion could not be determined.',
       );
 
@@ -50,7 +50,7 @@ const getNextAndroidVersionCode = (
 
     if (minSdkVersion.length > 2) {
       logger.warn(
-        'Could not update Android versionCode using the semantic-extended strategy '
+        'Could not update Android versionCode using the relative-extended strategy '
         + 'as the minSdkVersion is greater than 99. Welcome to the future. Have the '
         + 'robots taken over yet?',
       );

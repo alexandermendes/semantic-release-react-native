@@ -98,7 +98,7 @@ This is the default strategy for this platform.
 
 It auto-increments the current `versionCode` by one for every release.
 
-#### `semantic`
+#### `relative`
 
 Update the `versionCode` in-line with the next semantic version. For example,
 `v1.25.3` becomes `012503`, with each number in the semantic release version
@@ -115,7 +115,7 @@ the first, in which case this will break when we release version `v1.101.1`
 If you think you are unlikely to have 100 MINOR or PATCH versions then go ahead
 and use this strategy.
 
-#### `semantic-extended`
+#### `relative-extended`
 
 This is similar to the `semantic` strategy described above, yet with the addition
 of the minumum API level as the first two digits, followed by a zero. It also
@@ -174,9 +174,9 @@ This strategy behaves the same as the `increment` strategy for Android.
 
 Note the potential risks around In App Purchases described above.
 
-#### `semantic`
+#### `relative`
 
-This strategy behaves the same as the `semantic` strategy for Android.
+This strategy behaves the same as the `relative` strategy for Android.
 
 Again, note the potential risks around In App Purchases described above.
 

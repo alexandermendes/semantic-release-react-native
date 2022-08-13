@@ -188,7 +188,7 @@ describe('Publish', () => {
       ${'1.12.1'}   | ${'011201'}
       ${'99.99.99'} | ${'999999'}
     `(
-      'updates the versionCode to $expectedVersionCode for version $version when using the semantic strategy',
+      'updates the versionCode to $expectedVersionCode for version $version when using the relative strategy',
       async ({ version, expectedVersionCode }) => {
         const context = createContext({ version });
 
@@ -196,7 +196,7 @@ describe('Publish', () => {
           skipIos: true,
           versionStrategy: {
             android: {
-              buildNumber: 'semantic',
+              buildNumber: 'relative',
             },
           },
         }, context);
@@ -213,7 +213,7 @@ describe('Publish', () => {
       ${'1'}        | ${'010010203'}
       ${'24'}       | ${'240010203'}
     `(
-      'updates the versionCode using the semantic-extended strategy when the min SDK version is $minSdkVersion',
+      'updates the versionCode using the relative-extended strategy when the min SDK version is $minSdkVersion',
       async ({ minSdkVersion, expectedVersionCode }) => {
         const context = createContext();
 
@@ -233,7 +233,7 @@ describe('Publish', () => {
           skipIos: true,
           versionStrategy: {
             android: {
-              buildNumber: 'semantic-extended',
+              buildNumber: 'relative-extended',
             },
           },
         }, context);
@@ -250,7 +250,7 @@ describe('Publish', () => {
       '100.0.0',
       '1.100.0',
       '1.0.100',
-    ])('handles updating the versionCode using the semantic strategy when we reach version %s', async (version) => {
+    ])('handles updating the versionCode using the relative strategy when we reach version %s', async (version) => {
       const context = createContext({ version });
 
       (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
@@ -268,7 +268,7 @@ describe('Publish', () => {
         skipIos: true,
         versionStrategy: {
           android: {
-            buildNumber: 'semantic',
+            buildNumber: 'relative',
           },
         },
       }, context);
@@ -280,13 +280,13 @@ describe('Publish', () => {
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
-        'Could not update Android bundle version using the semantic strategy '
+        'Could not update Android bundle version using the relative strategy '
         + 'as the numbers in your semantic version exceed two digits. It is '
         + 'recommended that you switch to the increment strategy (see plugin docs).',
       );
     });
 
-    it('handles updating the versionCode using the semantic-extended strategy when the minSdkVersion is missing', async () => {
+    it('handles updating the versionCode using the relative-extended strategy when the minSdkVersion is missing', async () => {
       const context = createContext();
 
       (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
@@ -304,7 +304,7 @@ describe('Publish', () => {
         skipIos: true,
         versionStrategy: {
           android: {
-            buildNumber: 'semantic-extended',
+            buildNumber: 'relative-extended',
           },
         },
       }, context);
@@ -316,12 +316,12 @@ describe('Publish', () => {
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
-        'Could not update Android versionCode using the semantic-extended strategy '
+        'Could not update Android versionCode using the relative-extended strategy '
         + 'as the minSdkVersion could not be determined.',
       );
     });
 
-    it('handles updating the versionCode using the semantic-extended strategy when the minSdkVersion is a variable', async () => {
+    it('handles updating the versionCode using the relative-extended strategy when the minSdkVersion is a variable', async () => {
       const context = createContext();
 
       (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
@@ -340,7 +340,7 @@ describe('Publish', () => {
         skipIos: true,
         versionStrategy: {
           android: {
-            buildNumber: 'semantic-extended',
+            buildNumber: 'relative-extended',
           },
         },
       }, context);
@@ -353,12 +353,12 @@ describe('Publish', () => {
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
-        'Could not update Android versionCode using the semantic-extended strategy '
+        'Could not update Android versionCode using the relative-extended strategy '
         + 'as the minSdkVersion could not be determined.',
       );
     });
 
-    it('handles updating the versionCode using the semantic-extended strategy when the minSdkVersion is 100', async () => {
+    it('handles updating the versionCode using the relative-extended strategy when the minSdkVersion is 100', async () => {
       const context = createContext();
 
       (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
@@ -377,7 +377,7 @@ describe('Publish', () => {
         skipIos: true,
         versionStrategy: {
           android: {
-            buildNumber: 'semantic-extended',
+            buildNumber: 'relative-extended',
           },
         },
       }, context);
@@ -390,7 +390,7 @@ describe('Publish', () => {
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
-        'Could not update Android versionCode using the semantic-extended strategy '
+        'Could not update Android versionCode using the relative-extended strategy '
         + 'as the minSdkVersion is greater than 99. Welcome to the future. Have the '
         + 'robots taken over yet?',
       );
@@ -490,7 +490,7 @@ describe('Publish', () => {
       ${undefined}   | ${'1.1.1'}
       ${'strict'}    | ${'1.1.1'}
       ${'increment'} | ${'1'}
-      ${'semantic'}  | ${'010203'}
+      ${'relative'}  | ${'010203'}
     `(
       'starts CFBundleVersion from $bundleVersion when using strategy $strategy if it does not exist',
       async ({ strategy, bundleVersion }) => {
@@ -819,7 +819,7 @@ describe('Publish', () => {
       ${'1.12.1'}   | ${'011201'}
       ${'99.99.99'} | ${'999999'}
     `(
-      'sets the CFBundleVersion to $expectedBundleVersion for version $version when using the semantic strategy',
+      'sets the CFBundleVersion to $expectedBundleVersion for version $version when using the relative strategy',
       async ({ version, expectedBundleVersion }) => {
         const context = createContext({ version });
 
@@ -836,7 +836,7 @@ describe('Publish', () => {
           skipAndroid: true,
           versionStrategy: {
             ios: {
-              buildNumber: 'semantic',
+              buildNumber: 'relative',
             },
           },
         }, context);
@@ -875,7 +875,7 @@ describe('Publish', () => {
         skipAndroid: true,
         versionStrategy: {
           ios: {
-            buildNumber: 'semantic',
+            buildNumber: 'relative',
           },
         },
       }, context);
@@ -892,7 +892,7 @@ describe('Publish', () => {
 
       expect(logger.warn).toHaveBeenCalledTimes(2);
       expect(logger.warn).toHaveBeenCalledWith(
-        'Could not update iOS bundle version using the semantic strategy '
+        'Could not update iOS bundle version using the relative strategy '
         + 'as the numbers in your semantic version exceed two digits. It is '
         + 'recommended that you switch to the increment strategy (see plugin docs).',
       );

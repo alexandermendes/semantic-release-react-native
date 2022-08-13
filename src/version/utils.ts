@@ -34,7 +34,7 @@ export const getSemanticBuildNumber = (
 
   if (major.length > 2 || minor.length > 2 || patch.length > 2) {
     logger.warn(
-      `Could not update ${platform} bundle version using the semantic strategy `
+      `Could not update ${platform} bundle version using the relative strategy `
       + 'as the numbers in your semantic version exceed two digits. It is '
       + 'recommended that you switch to the increment strategy (see plugin docs).',
     );
