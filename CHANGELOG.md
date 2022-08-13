@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.4.0...v1.4.1) (2022-08-13)
+
+
+### Bug Fixes
+
+* do not override any MARKETING_VERSION in Info.plist ([fb40be6](https://github.com/alexandermendes/semantic-release-react-native/commit/fb40be632b14320f541a929194a74ac6c94cbe7c))
+
 # [1.4.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.3.4...v1.4.0) (2022-08-13)
 
 
