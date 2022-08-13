@@ -13,6 +13,7 @@ const logger = {
   log: jest.fn(),
   info: jest.fn(),
   success: jest.fn(),
+  warn: jest.fn(),
   error: jest.fn(),
 } as unknown as Context['logger'];
 
@@ -179,6 +180,239 @@ describe('Publish', () => {
       expect(fs.readFileSync).toHaveBeenCalledTimes(1);
       expect(fs.readFileSync).toHaveBeenCalledWith(androidPath);
     });
+
+    it.each`
+      version       | expectedVersionCode
+      ${'1.0.0'}    | ${'010000'}
+      ${'10.1.10'}  | ${'100110'}
+      ${'1.12.1'}   | ${'011201'}
+      ${'99.99.99'} | ${'999999'}
+    `(
+      'updates the versionCode to $expectedVersionCode for version $version when using the relative strategy',
+      async ({ version, expectedVersionCode }) => {
+        const context = createContext({ version });
+
+        await publish({
+          skipIos: true,
+          versionStrategy: {
+            android: {
+              buildNumber: 'relative',
+            },
+          },
+        }, context);
+
+        expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+          `versionName "${version}"`,
+          `versionCode ${expectedVersionCode}`,
+        ].join('\n'));
+      },
+    );
+
+    it.each`
+      minSdkVersion | expectedVersionCode
+      ${'1'}        | ${'010010203'}
+      ${'24'}       | ${'240010203'}
+    `(
+      'updates the versionCode using the relative-extended strategy when the min SDK version is $minSdkVersion',
+      async ({ minSdkVersion, expectedVersionCode }) => {
+        const context = createContext();
+
+        (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
+          if (filePath.endsWith('build.gradle')) {
+            return [
+              `minSdkVersion ${minSdkVersion}`,
+              'versionName "1.0.0"',
+              'versionCode 100',
+            ].join('\n');
+          }
+
+          return null;
+        });
+
+        await publish({
+          skipIos: true,
+          versionStrategy: {
+            android: {
+              buildNumber: 'relative-extended',
+            },
+          },
+        }, context);
+
+        expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+          `minSdkVersion ${minSdkVersion}`,
+          'versionName "1.2.3"',
+          `versionCode ${expectedVersionCode}`,
+        ].join('\n'));
+      },
+    );
+
+    it.each([
+      '100.0.0',
+      '1.100.0',
+      '1.0.100',
+    ])('handles updating the versionCode using the relative strategy when we reach version %s', async (version) => {
+      const context = createContext({ version });
+
+      (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
+        if (filePath.endsWith('build.gradle')) {
+          return [
+            'versionName "1.0.0"',
+            'versionCode 100',
+          ].join('\n');
+        }
+
+        return null;
+      });
+
+      await publish({
+        skipIos: true,
+        versionStrategy: {
+          android: {
+            buildNumber: 'relative',
+          },
+        },
+      }, context);
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+        `versionName "${version}"`,
+        'versionCode 100',
+      ].join('\n'));
+
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Could not update Android bundle version using the relative strategy '
+        + 'as the numbers in your semantic version exceed two digits. It is '
+        + 'recommended that you switch to the increment strategy (see plugin docs).',
+      );
+    });
+
+    it('handles updating the versionCode using the relative-extended strategy when the minSdkVersion is missing', async () => {
+      const context = createContext();
+
+      (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
+        if (filePath.endsWith('build.gradle')) {
+          return [
+            'versionName "1.0.0"',
+            'versionCode 100',
+          ].join('\n');
+        }
+
+        return null;
+      });
+
+      await publish({
+        skipIos: true,
+        versionStrategy: {
+          android: {
+            buildNumber: 'relative-extended',
+          },
+        },
+      }, context);
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+        'versionName "1.2.3"',
+        'versionCode 100',
+      ].join('\n'));
+
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Could not update Android versionCode using the relative-extended strategy '
+        + 'as the minSdkVersion could not be determined.',
+      );
+    });
+
+    it('handles updating the versionCode using the relative-extended strategy when the minSdkVersion is a variable', async () => {
+      const context = createContext();
+
+      (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
+        if (filePath.endsWith('build.gradle')) {
+          return [
+            'minSdkVersion project.ext.minSdkVersion',
+            'versionName "1.0.0"',
+            'versionCode 100',
+          ].join('\n');
+        }
+
+        return null;
+      });
+
+      await publish({
+        skipIos: true,
+        versionStrategy: {
+          android: {
+            buildNumber: 'relative-extended',
+          },
+        },
+      }, context);
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+        'minSdkVersion project.ext.minSdkVersion',
+        'versionName "1.2.3"',
+        'versionCode 100',
+      ].join('\n'));
+
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Could not update Android versionCode using the relative-extended strategy '
+        + 'as the minSdkVersion could not be determined.',
+      );
+    });
+
+    it('handles updating the versionCode using the relative-extended strategy when the minSdkVersion is 100', async () => {
+      const context = createContext();
+
+      (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
+        if (filePath.endsWith('build.gradle')) {
+          return [
+            'minSdkVersion 100',
+            'versionName "1.0.0"',
+            'versionCode 100',
+          ].join('\n');
+        }
+
+        return null;
+      });
+
+      await publish({
+        skipIos: true,
+        versionStrategy: {
+          android: {
+            buildNumber: 'relative-extended',
+          },
+        },
+      }, context);
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+        'minSdkVersion 100',
+        'versionName "1.2.3"',
+        'versionCode 100',
+      ].join('\n'));
+
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Could not update Android versionCode using the relative-extended strategy '
+        + 'as the minSdkVersion is greater than 99. Welcome to the future. Have the '
+        + 'robots taken over yet?',
+      );
+    });
+
+    it('does not update versionCode using the none strategy', async () => {
+      const context = createContext();
+
+      await publish({
+        skipIos: true,
+        versionStrategy: {
+          android: {
+            buildNumber: 'none',
+          },
+        },
+      }, context);
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+        'versionName "1.2.3"',
+        'versionCode 100',
+      ].join('\n'));
+    });
   });
 
   describe('iOS', () => {
@@ -251,22 +485,38 @@ describe('Publish', () => {
       );
     });
 
-    it('starts CFBundleVersion from 1.1.1 if it does not exist', async () => {
-      (plist.parse as jest.Mock).mockReturnValue({
-        CFBundleDisplayName: 'My App',
-      });
+    it.each`
+      strategy       | bundleVersion
+      ${undefined}   | ${'1.1.1'}
+      ${'strict'}    | ${'1.1.1'}
+      ${'increment'} | ${'1'}
+      ${'relative'}  | ${'010203'}
+    `(
+      'starts CFBundleVersion from $bundleVersion when using strategy $strategy if it does not exist',
+      async ({ strategy, bundleVersion }) => {
+        (plist.parse as jest.Mock).mockReturnValue({
+          CFBundleDisplayName: 'My App',
+        });
 
-      const context = createContext();
+        const context = createContext();
 
-      await publish({ skipAndroid: true }, context);
+        await publish({
+          skipAndroid: true,
+          versionStrategy: {
+            ios: {
+              buildNumber: strategy,
+            },
+          },
+        }, context);
 
-      expect(plist.build).toHaveBeenCalledTimes(1);
-      expect(plist.build).toHaveBeenCalledWith({
-        CFBundleDisplayName: 'My App',
-        CFBundleShortVersionString: '1.2.3',
-        CFBundleVersion: '1.1.1',
-      });
-    });
+        expect(plist.build).toHaveBeenCalledTimes(1);
+        expect(plist.build).toHaveBeenCalledWith({
+          CFBundleDisplayName: 'My App',
+          CFBundleShortVersionString: '1.2.3',
+          CFBundleVersion: bundleVersion,
+        });
+      },
+    );
 
     it('skips incrementing the bundle version', async () => {
       const context = createContext();
@@ -326,7 +576,7 @@ describe('Publish', () => {
       ${'0.0.1'}           | ${'1.1.1'}
       ${'100.100.100'}     | ${'101.1.1'}
     `(
-      'sets the CFBundleVersion to $previousBundleVersion from $expectedBundleVersion',
+      'sets the CFBundleVersion to $expectedBundleVersion from $previousBundleVersion',
       async ({ previousBundleVersion, expectedBundleVersion }) => {
         const context = createContext();
 
@@ -558,6 +808,203 @@ describe('Publish', () => {
       expect(patch).toHaveBeenCalledWith({
         buildSettings: {
           CURRENT_PROJECT_VERSION: '1.1.2',
+        },
+      });
+    });
+
+    it.each`
+      version       | expectedBundleVersion
+      ${'1.0.0'}    | ${'010000'}
+      ${'10.1.10'}  | ${'100110'}
+      ${'1.12.1'}   | ${'011201'}
+      ${'99.99.99'} | ${'999999'}
+    `(
+      'sets the CFBundleVersion to $expectedBundleVersion for version $version when using the relative strategy',
+      async ({ version, expectedBundleVersion }) => {
+        const context = createContext({ version });
+
+        (plist.parse as jest.Mock).mockReturnValue({
+          CFBundleVersion: '100',
+        });
+
+        getBuildSetting.mockImplementation((value: string) => ({
+          INFOPLIST_FILE: { text: 'Test/Info.plist' },
+          CURRENT_PROJECT_VERSION: { text: '100' },
+        }[value]));
+
+        await publish({
+          skipAndroid: true,
+          versionStrategy: {
+            ios: {
+              buildNumber: 'relative',
+            },
+          },
+        }, context);
+
+        expect(plist.build).toHaveBeenCalledTimes(1);
+        expect((plist.build as jest.Mock).mock.calls[0][0].CFBundleVersion).toBe(
+          expectedBundleVersion,
+        );
+
+        expect(buildConfig.patch).toHaveBeenCalledTimes(1);
+        expect(buildConfig.patch).toHaveBeenCalledWith({
+          buildSettings: {
+            CURRENT_PROJECT_VERSION: expectedBundleVersion,
+          },
+        });
+      },
+    );
+
+    it.each([
+      '100.0.0',
+      '1.100.0',
+      '1.0.100',
+    ])('handles updating the bundle version using the semantic strategy when we reach version %s', async (version) => {
+      const context = createContext({ version });
+
+      (plist.parse as jest.Mock).mockReturnValue({
+        CFBundleVersion: '100',
+      });
+
+      getBuildSetting.mockImplementation((value: string) => ({
+        INFOPLIST_FILE: { text: 'Test/Info.plist' },
+        CURRENT_PROJECT_VERSION: { text: '100' },
+      }[value]));
+
+      await publish({
+        skipAndroid: true,
+        versionStrategy: {
+          ios: {
+            buildNumber: 'relative',
+          },
+        },
+      }, context);
+
+      expect(plist.build).toHaveBeenCalledTimes(1);
+      expect((plist.build as jest.Mock).mock.calls[0][0].CFBundleVersion).toBe('100');
+
+      expect(buildConfig.patch).toHaveBeenCalledTimes(1);
+      expect(buildConfig.patch).toHaveBeenCalledWith({
+        buildSettings: {
+          CURRENT_PROJECT_VERSION: '100',
+        },
+      });
+
+      expect(logger.warn).toHaveBeenCalledTimes(2);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Could not update iOS bundle version using the relative strategy '
+        + 'as the numbers in your semantic version exceed two digits. It is '
+        + 'recommended that you switch to the increment strategy (see plugin docs).',
+      );
+    });
+
+    it('does not modify the version when using versioning strategy none', async () => {
+      const context = createContext({ version: '1.2.3-alpha.1' });
+
+      (plist.parse as jest.Mock).mockReturnValue({
+        CFBundleVersion: '1.1.1',
+      });
+
+      getBuildSetting.mockImplementation((value: string) => ({
+        INFOPLIST_FILE: { text: 'Test/Info.plist' },
+        CURRENT_PROJECT_VERSION: { text: '1.1.1' },
+      }[value]));
+
+      await publish({
+        skipAndroid: true,
+        versionStrategy: {
+          ios: {
+            buildNumber: 'none',
+          },
+        },
+      }, context);
+
+      expect(plist.build).toHaveBeenCalledTimes(1);
+      expect((plist.build as jest.Mock).mock.calls[0][0].CFBundleVersion).toBe(
+        '1.1.1',
+      );
+
+      expect(buildConfig.patch).toHaveBeenCalledTimes(1);
+      expect(buildConfig.patch).toHaveBeenCalledWith({
+        buildSettings: {
+          CURRENT_PROJECT_VERSION: '1.1.1',
+        },
+      });
+    });
+
+    it.each`
+      previousBundleVersion  | expectedBundleVersion
+      ${'1'}                 | ${'2'}
+      ${'12345'}             | ${'12346'}
+      ${'1.1'}               | ${'2'}
+      ${'4.5.6'}             | ${'5'}
+    `(
+      'handles updating the bundle version using the increment strategy when the previous version was %s',
+      async ({ previousBundleVersion, expectedBundleVersion }) => {
+        const context = createContext();
+
+        (plist.parse as jest.Mock).mockReturnValue({
+          CFBundleVersion: previousBundleVersion,
+        });
+
+        getBuildSetting.mockImplementation((value: string) => ({
+          INFOPLIST_FILE: { text: 'Test/Info.plist' },
+          CURRENT_PROJECT_VERSION: { text: previousBundleVersion },
+        }[value]));
+
+        await publish({
+          skipAndroid: true,
+          versionStrategy: {
+            ios: {
+              buildNumber: 'increment',
+            },
+          },
+        }, context);
+
+        expect(plist.build).toHaveBeenCalledTimes(1);
+        expect((plist.build as jest.Mock).mock.calls[0][0].CFBundleVersion).toBe(
+          expectedBundleVersion,
+        );
+
+        expect(buildConfig.patch).toHaveBeenCalledTimes(1);
+        expect(buildConfig.patch).toHaveBeenCalledWith({
+          buildSettings: {
+            CURRENT_PROJECT_VERSION: expectedBundleVersion,
+          },
+        });
+      },
+    );
+
+    it('updates using the semantic versioning strategy', async () => {
+      const context = createContext({ version: '1.2.3-alpha.1' });
+
+      (plist.parse as jest.Mock).mockReturnValue({
+        CFBundleVersion: '1.1.1',
+      });
+
+      getBuildSetting.mockImplementation((value: string) => ({
+        INFOPLIST_FILE: { text: 'Test/Info.plist' },
+        CURRENT_PROJECT_VERSION: { text: '1.1.1' },
+      }[value]));
+
+      await publish({
+        skipAndroid: true,
+        versionStrategy: {
+          ios: {
+            buildNumber: 'semantic',
+          },
+        },
+      }, context);
+
+      expect(plist.build).toHaveBeenCalledTimes(1);
+      expect((plist.build as jest.Mock).mock.calls[0][0].CFBundleVersion).toBe(
+        '1.2.3',
+      );
+
+      expect(buildConfig.patch).toHaveBeenCalledTimes(1);
+      expect(buildConfig.patch).toHaveBeenCalledWith({
+        buildSettings: {
+          CURRENT_PROJECT_VERSION: '1.2.3',
         },
       });
     });

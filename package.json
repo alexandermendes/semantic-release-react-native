@@ -67,6 +67,7 @@
   },
   "dependencies": {
     "app-root-path": "^3.0.0",
+    "deepmerge": "^4.2.2",
     "lodash.flattendeep": "^4.4.0",
     "lodash.uniq": "^4.5.0",
     "pbxproj-dom": "^1.2.0",

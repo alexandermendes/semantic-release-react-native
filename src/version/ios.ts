@@ -1,22 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import plist, { PlistObject, PlistValue } from 'plist';
-import semver from 'semver';
 import { Xcode } from 'pbxproj-dom/xcode';
 import unique from 'lodash.uniq';
 import flattenDeep from 'lodash.flattendeep';
-import type { Context, NextRelease } from 'semantic-release';
-import type { FullPluginConfig } from './types';
-import { toAbsolutePath } from './paths';
-
-/**
- * Get the path to the Android bundle.gradle file.
- */
-const getAndroidPath = (androidPath?: string) => {
-  const defaultAndroidPath = path.join('android', 'app', 'build.gradle');
-
-  return toAbsolutePath(androidPath ?? defaultAndroidPath);
-};
+import type { Context } from 'semantic-release';
+import type { FullPluginConfig } from '../types';
+import { toAbsolutePath } from '../paths';
+import { getSemanticBuildNumber, getVersion, stripPrereleaseVersion } from './utils';
 
 /**
  * Get the path to the iOS Xcode project file.
@@ -28,30 +19,15 @@ const getIosPath = (iosPath?: string) => {
 };
 
 /**
- * Strip any pre-release label from a version (e.g. 1.2.3-beta.1).
- *
- * iOS do not accept pre-release versions against CFBundleShortVersionString.
- *
- * @see https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleshortversionstring
+ * Get the bundle version for iOS using the strict strategy.
  */
-const stripPrereleaseVersion = (version: string) => {
-  const major = semver.major(version);
-  const minor = semver.minor(version);
-  const patch = semver.patch(version);
-
-  return `${major}.${minor}.${patch}`;
-};
-
-/**
- * Get a build version for iOS.
- */
-const getIosBundleVersion = (previousBundleVersion: string, version: string) => {
-  const [majorStr, minorStr, patchStr] = previousBundleVersion.split('.');
+const getIosStrictBundleVersion = (currentBundleVersion: string, version: string) => {
+  const [majorStr, minorStr, patchStr] = currentBundleVersion.split('.');
   let major = parseInt(majorStr ?? 0, 10);
   let minor = parseInt(minorStr ?? 0, 10);
   let patch = parseInt(patchStr ?? 0, 10);
 
-  if (!previousBundleVersion) {
+  if (!currentBundleVersion) {
     return '1.1.1';
   }
 
@@ -102,6 +78,42 @@ const getIosBundleVersion = (previousBundleVersion: string, version: string) => 
   bundleVersion += `${validPreReleaseChar}${preReleaseVersion}`;
 
   return bundleVersion;
+};
+
+/**
+ * Get a build version for iOS.
+ */
+const getIosBundleVersion = (
+  strategy: FullPluginConfig['versionStrategy']['ios'],
+  logger: Context['logger'],
+  currentBundleVersion: string,
+  version: string,
+) => {
+  if (strategy?.buildNumber === 'none') {
+    return currentBundleVersion;
+  }
+
+  if (strategy?.buildNumber === 'semantic') {
+    return stripPrereleaseVersion(version);
+  }
+
+  if (strategy?.buildNumber === 'relative') {
+    const semanticBuildNumber = getSemanticBuildNumber(version, logger, 'iOS');
+
+    if (!semanticBuildNumber) {
+      return currentBundleVersion;
+    }
+
+    return semanticBuildNumber;
+  }
+
+  if (strategy?.buildNumber === 'increment') {
+    const major = currentBundleVersion ? parseInt(currentBundleVersion, 10) : 0;
+
+    return String(major + 1);
+  }
+
+  return getIosStrictBundleVersion(currentBundleVersion, version);
 };
 
 /**
@@ -162,7 +174,12 @@ const incrementPbxProjectBuildNumbers = (
         }
 
         if (currentProjectVersion && !skipBuildNumber) {
-          const newProjectVersion = getIosBundleVersion(String(currentProjectVersion), version);
+          const newProjectVersion = getIosBundleVersion(
+            pluginConfig.versionStrategy.ios,
+            logger,
+            String(currentProjectVersion),
+            version,
+          );
 
           Object.assign(buildSettings, {
             [currentProjectVersionKey]: newProjectVersion,
@@ -194,6 +211,7 @@ const isPlistObject = (value: PlistValue): value is PlistObject => (
  * Update the CFBundleVersion property.
  */
 const updateCfBundleVersion = (
+  pluginConfig: FullPluginConfig,
   plistFilename: string,
   plistObj: PlistObject,
   version: string,
@@ -201,7 +219,12 @@ const updateCfBundleVersion = (
 ) => {
   const key = 'CFBundleVersion';
   const currentBuildVersion = plistObj[key] ? String(plistObj[key]) : '';
-  const newBuildVersion = getIosBundleVersion(currentBuildVersion, version);
+  const newBuildVersion = getIosBundleVersion(
+    pluginConfig.versionStrategy.ios,
+    logger,
+    currentBuildVersion,
+    version,
+  );
 
   if (currentBuildVersion.startsWith('$(')) {
     logger.info(
@@ -271,24 +294,11 @@ const incrementPlistVersions = (
       updateCfBundleShortVersion(plistFilename, plistObj, version, logger);
 
       if (!pluginConfig.skipBuildNumber) {
-        updateCfBundleVersion(plistFilename, plistObj, version, logger);
+        updateCfBundleVersion(pluginConfig, plistFilename, plistObj, version, logger);
       }
 
       fs.writeFileSync(path.join(iosPath, plistFilename), plist.build(plistObj));
     });
-};
-
-/**
- * Get the version to be released, if any.
- */
-const getVersion = (noPrerelease: boolean, nextRelease?: NextRelease) => {
-  if (!nextRelease) {
-    return null;
-  }
-
-  return noPrerelease
-    ? stripPrereleaseVersion(nextRelease.version)
-    : nextRelease.version;
 };
 
 /**
@@ -323,55 +333,5 @@ export const versionIos = (
   const xcode = Xcode.open(path.join(projectFolder, 'project.pbxproj'));
 
   incrementPbxProjectBuildNumbers(xcode, logger, version, pluginConfig);
-
   incrementPlistVersions(pluginConfig, xcode, iosPath, version, logger);
-};
-
-/**
- * Update Android files with the new version.
- *
- * @see https://developer.android.com/studio/publish/versioning
- */
-export const versionAndroid = (
-  pluginConfig: FullPluginConfig,
-  context: Context,
-) => {
-  const { logger } = context;
-  const version = getVersion(pluginConfig.noPrerelease, context.nextRelease);
-
-  if (!version) {
-    return;
-  }
-
-  logger.info('Versioning Android');
-
-  const androidPath = getAndroidPath(pluginConfig.androidPath);
-
-  if (!fs.existsSync(androidPath)) {
-    logger.error(`No file found at ${androidPath}`);
-
-    return;
-  }
-
-  let gradleFile = fs.readFileSync(androidPath).toString();
-  let newBuildNumber;
-
-  gradleFile = gradleFile.replace(
-    /versionName (["'])(.*)["']/,
-    `versionName $1${version}$1`,
-  );
-
-  logger.success(`Android versionName > ${version}`);
-
-  if (!pluginConfig.skipBuildNumber) {
-    gradleFile = gradleFile.replace(/versionCode (\d+)/, (_match, currentVersionCode) => {
-      newBuildNumber = String(parseInt(currentVersionCode, 10) + 1);
-
-      return `versionCode ${newBuildNumber}`;
-    });
-
-    logger.success(`Android versionCode > ${newBuildNumber}`);
-  }
-
-  fs.writeFileSync(androidPath, gradleFile);
 };

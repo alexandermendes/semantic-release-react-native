@@ -6,6 +6,14 @@ export type PluginConfig = {
   skipAndroid?: boolean;
   skipIos?: boolean;
   noPrerelease?: boolean;
+  versionStrategy?: {
+    android?: {
+      buildNumber: 'increment' | 'relative' | 'relative-extended' | 'none';
+    },
+    ios?: {
+      buildNumber: 'strict' | 'increment' | 'relative' | 'semantic' | 'none';
+    };
+  };
 };
 
 export type FullPluginConfig = Required<PluginConfig>;
