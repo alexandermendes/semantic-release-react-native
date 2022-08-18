@@ -6,7 +6,7 @@ import { Xcode } from 'pbxproj-dom/xcode';
 import unique from 'lodash.uniq';
 import detectIndent from 'detect-indent';
 import flattenDeep from 'lodash.flattendeep';
-import htmlMinifier from 'html-minifier'
+import htmlMinifier from 'html-minifier';
 import type { Context } from 'semantic-release';
 import type { FullPluginConfig } from '../types';
 import { toAbsolutePath } from '../paths';
