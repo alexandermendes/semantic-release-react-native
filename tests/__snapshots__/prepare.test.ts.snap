@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`prepare iOS updates the plist file 1`] = `
+"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
+<!DOCTYPE plist PUBLIC \\"-//Apple//DTD PLIST 1.0//EN\\">
+<plist version=\\"1.0\\">
+<dict>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>en</string>
+  <key>CFBundleDisplayName</key>
+  <string>My App</string>
+</dict>
+</plist>"
+`;
+
+exports[`prepare iOS updates the plist file 2`] = `
+"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
+<!DOCTYPE plist PUBLIC \\"-//Apple//DTD PLIST 1.0//EN\\" \\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\\">
+<plist version=\\"1.0\\">
+<dict>
+  <key>CFBundleDisplayName</key>
+  <string>My App</string>
+  <key>CFBundleVersion</key>
+  <string>100.1.1</string>
+  <key>CFBundleShortVersionString</key>
+  <string>1.2.3</string>
+</dict>
+</plist>
+"
+`;

@@ -439,7 +439,18 @@ describe('prepare', () => {
 
       (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
         if (filePath.endsWith('Info.plist')) {
-          return 'mock-plist-file';
+          return [
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN">',
+            '<plist version="1.0">',
+            '<dict>',
+            '  <key>CFBundleDevelopmentRegion</key>',
+            '  <string>en</string>',
+            '  <key>CFBundleDisplayName</key>',
+            '  <string>My App</string>',
+            '</dict>',
+            '</plist>',
+          ].join('\n');
         }
 
         return null;
@@ -451,7 +462,14 @@ describe('prepare', () => {
         CFBundleVersion: '100',
       });
 
-      (plist.build as jest.Mock).mockReturnValue('mock-built-plist');
+      (plist.build as jest.Mock).mockImplementation((plistObj) => [
+        '<dict>',
+        ...Object.entries(plistObj).map(([key, value]) => [
+          `<key>${key}</key>`,
+          `<string>${value}</string>`,
+        ].join('\n')),
+        '</dict>',
+      ].join('\n'));
 
       getBuildSetting.mockImplementation((value: string) => ({
         INFOPLIST_FILE: { text: 'Test/Info.plist' },
@@ -479,9 +497,20 @@ describe('prepare', () => {
       expect(fs.readFileSync).toHaveBeenCalledWith(
         `${appRoot.path}/ios/Test/Info.plist`,
       );
+    });
+
+    it('updates the plist file', async () => {
+      const context = createContext();
+
+      await prepare({ skipAndroid: true }, context);
+
+      expect(fs.readFileSync).toHaveBeenCalledTimes(1);
+      expect(fs.readFileSync).toHaveBeenCalledWith(
+        `${appRoot.path}/ios/Test/Info.plist`,
+      );
 
       expect(plist.parse).toHaveBeenCalledTimes(1);
-      expect(plist.parse).toHaveBeenCalledWith('mock-plist-file');
+      expect((plist.parse as jest.Mock).mock.calls[0][0]).toMatchSnapshot();
 
       expect(plist.build).toHaveBeenCalledTimes(1);
       expect(plist.build).toHaveBeenCalledWith({
@@ -493,8 +522,10 @@ describe('prepare', () => {
       expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
       expect(fs.writeFileSync).toHaveBeenCalledWith(
         `${appRoot.path}/ios/Test/Info.plist`,
-        'mock-built-plist',
+        expect.any(String),
       );
+
+      expect((fs.writeFileSync as jest.Mock).mock.calls[0][1]).toMatchSnapshot();
     });
 
     it.each`

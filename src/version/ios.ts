@@ -1,8 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 import plist, { PlistObject, PlistValue } from 'plist';
+import beautify, { HTMLBeautifyOptions } from 'js-beautify';
 import { Xcode } from 'pbxproj-dom/xcode';
 import unique from 'lodash.uniq';
+import detectIndent from 'detect-indent';
 import flattenDeep from 'lodash.flattendeep';
 import type { Context } from 'semantic-release';
 import type { FullPluginConfig } from '../types';
@@ -281,11 +283,9 @@ const incrementPlistVersions = (
       || path.dirname(plistFilename) === pluginConfig.iosPackageName
     ))
     .forEach((plistFilename) => {
-      const plistFile = fs.readFileSync(
-        path.join(iosPath, plistFilename),
-      ).toString();
-
-      const plistObj = plist.parse(plistFile);
+      const plistPath = path.join(iosPath, plistFilename);
+      const originalPlistFile = fs.readFileSync(plistPath).toString();
+      const plistObj = plist.parse(originalPlistFile);
 
       if (!isPlistObject(plistObj)) {
         return;
@@ -297,7 +297,35 @@ const incrementPlistVersions = (
         updateCfBundleVersion(pluginConfig, plistFilename, plistObj, version, logger);
       }
 
-      fs.writeFileSync(path.join(iosPath, plistFilename), plist.build(plistObj));
+      const indent = detectIndent(originalPlistFile);
+      const dictPattern = /<dict>[\s\S]*<\/dict>/i;
+      const newPlistContent = plist.build(plistObj).match(dictPattern)?.[0] ?? '';
+
+      const [xmlDeclaration] = originalPlistFile.match(/<\?xml.*\?>/i) ?? [];
+      const [doctypeElement] = originalPlistFile.match(/<\?doctype.*\?>/i) ?? [];
+      const [plistElement] = originalPlistFile.match(/<\?plist.*\?>/i) ?? [];
+      const beautifyOpts: HTMLBeautifyOptions = {};
+
+      if (indent.type === 'tab') {
+        beautifyOpts.indent_with_tabs = true;
+      } else {
+        beautifyOpts.indent_size = indent.amount;
+      }
+
+      let cleanPlistFile = `${[
+        xmlDeclaration ?? '<?xml version="1.0" encoding="UTF-8"?>',
+        doctypeElement ?? '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">',
+        plistElement ?? '<plist version="1.0">',
+        newPlistContent,
+        '</plist>',
+      ].join('\n')}\n`;
+
+      cleanPlistFile = cleanPlistFile.replace(
+        dictPattern,
+        beautify.html(newPlistContent, beautifyOpts),
+      );
+
+      fs.writeFileSync(plistPath, cleanPlistFile);
     });
 };
 
