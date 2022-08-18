@@ -3,7 +3,7 @@ import fs from 'fs';
 import { Xcode } from 'pbxproj-dom/xcode';
 import plist from 'plist';
 import type { Context } from 'semantic-release';
-import { publish } from '../src/publish';
+import { prepare } from '../src/prepare';
 
 jest.mock('fs');
 jest.mock('pbxproj-dom/xcode');
@@ -64,7 +64,7 @@ const mockXcode = {
   },
 };
 
-describe('Publish', () => {
+describe('prepare', () => {
   beforeEach(() => {
     (fs.existsSync as jest.Mock).mockReturnValue(true);
   });
@@ -86,7 +86,7 @@ describe('Publish', () => {
     it('updates the versionName and versionCode', async () => {
       const context = createContext();
 
-      await publish({ skipIos: true }, context);
+      await prepare({ skipIos: true }, context);
 
       expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
         'versionName "1.2.3"',
@@ -103,7 +103,7 @@ describe('Publish', () => {
     it('skips the versionCode if the skipBuildNumber option was given', async () => {
       const context = createContext();
 
-      await publish({ skipIos: true, skipBuildNumber: true }, context);
+      await prepare({ skipIos: true, skipBuildNumber: true }, context);
 
       expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
         'versionName "1.2.3"',
@@ -114,7 +114,7 @@ describe('Publish', () => {
     it('does not update anything if the skipAndroid option was given', async () => {
       const context = createContext();
 
-      await publish({ skipIos: true, skipAndroid: true }, context);
+      await prepare({ skipIos: true, skipAndroid: true }, context);
 
       expect(fs.writeFileSync).not.toHaveBeenCalled();
     });
@@ -124,7 +124,7 @@ describe('Publish', () => {
 
       const context = createContext();
 
-      await publish({ skipIos: true }, context);
+      await prepare({ skipIos: true }, context);
 
       expect(fs.writeFileSync).not.toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalledTimes(1);
@@ -136,7 +136,7 @@ describe('Publish', () => {
     it('updates to a prerelease version', async () => {
       const context = createContext({ version: '1.2.3-beta.1' });
 
-      await publish({ skipIos: true }, context);
+      await prepare({ skipIos: true }, context);
 
       expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
         'versionName "1.2.3-beta.1"',
@@ -147,7 +147,7 @@ describe('Publish', () => {
     it('skips a prerelease version if noPrerelease option given', async () => {
       const context = createContext({ version: '1.2.3-beta.1' });
 
-      await publish({ skipIos: true, noPrerelease: true }, context);
+      await prepare({ skipIos: true, noPrerelease: true }, context);
 
       expect(fs.writeFileSync).not.toHaveBeenCalled();
     });
@@ -155,7 +155,7 @@ describe('Publish', () => {
     it('skips a prerelease version if disabled for the platform', async () => {
       const context = createContext({ version: '1.2.3-beta.1' });
 
-      await publish({
+      await prepare({
         skipIos: true,
         versionStrategy: {
           android: {
@@ -171,7 +171,7 @@ describe('Publish', () => {
       const context = createContext();
       const androidPath = 'src/android/build.gradle';
 
-      await publish({ skipIos: true, androidPath: `./${androidPath}` }, context);
+      await prepare({ skipIos: true, androidPath: `./${androidPath}` }, context);
 
       expect(fs.existsSync).toHaveBeenCalledTimes(1);
       expect(fs.existsSync).toHaveBeenCalledWith(`${appRoot.path}/${androidPath}`);
@@ -184,7 +184,7 @@ describe('Publish', () => {
       const context = createContext();
       const androidPath = '/absolute/build.gradle';
 
-      await publish({ skipIos: true, androidPath }, context);
+      await prepare({ skipIos: true, androidPath }, context);
 
       expect(fs.existsSync).toHaveBeenCalledTimes(1);
       expect(fs.existsSync).toHaveBeenCalledWith(androidPath);
@@ -204,7 +204,7 @@ describe('Publish', () => {
       async ({ version, expectedVersionCode }) => {
         const context = createContext({ version });
 
-        await publish({
+        await prepare({
           skipIos: true,
           versionStrategy: {
             android: {
@@ -241,7 +241,7 @@ describe('Publish', () => {
           return null;
         });
 
-        await publish({
+        await prepare({
           skipIos: true,
           versionStrategy: {
             android: {
@@ -276,7 +276,7 @@ describe('Publish', () => {
         return null;
       });
 
-      await publish({
+      await prepare({
         skipIos: true,
         versionStrategy: {
           android: {
@@ -312,7 +312,7 @@ describe('Publish', () => {
         return null;
       });
 
-      await publish({
+      await prepare({
         skipIos: true,
         versionStrategy: {
           android: {
@@ -348,7 +348,7 @@ describe('Publish', () => {
         return null;
       });
 
-      await publish({
+      await prepare({
         skipIos: true,
         versionStrategy: {
           android: {
@@ -385,7 +385,7 @@ describe('Publish', () => {
         return null;
       });
 
-      await publish({
+      await prepare({
         skipIos: true,
         versionStrategy: {
           android: {
@@ -411,7 +411,7 @@ describe('Publish', () => {
     it('does not update versionCode using the none strategy', async () => {
       const context = createContext();
 
-      await publish({
+      await prepare({
         skipIos: true,
         versionStrategy: {
           android: {
@@ -463,7 +463,7 @@ describe('Publish', () => {
     it('updates the project.pbxproj file', async () => {
       const context = createContext();
 
-      await publish({ skipAndroid: true }, context);
+      await prepare({ skipAndroid: true }, context);
 
       expect(buildConfig.patch).toHaveBeenCalledTimes(1);
       expect(buildConfig.patch).toHaveBeenCalledWith({
@@ -512,7 +512,7 @@ describe('Publish', () => {
 
         const context = createContext();
 
-        await publish({
+        await prepare({
           skipAndroid: true,
           versionStrategy: {
             ios: {
@@ -533,7 +533,7 @@ describe('Publish', () => {
     it('skips incrementing the bundle version', async () => {
       const context = createContext();
 
-      await publish({ skipAndroid: true, skipBuildNumber: true }, context);
+      await prepare({ skipAndroid: true, skipBuildNumber: true }, context);
 
       expect(plist.build).toHaveBeenCalledTimes(1);
       expect(plist.build).toHaveBeenCalledWith({
@@ -557,7 +557,7 @@ describe('Publish', () => {
 
       const context = createContext();
 
-      await publish({ skipAndroid: true, skipBuildNumber: true }, context);
+      await prepare({ skipAndroid: true, skipBuildNumber: true }, context);
 
       expect(buildConfig.patch).not.toHaveBeenCalled();
     });
@@ -567,7 +567,7 @@ describe('Publish', () => {
 
       const context = createContext();
 
-      await publish({ skipAndroid: true }, context);
+      await prepare({ skipAndroid: true }, context);
 
       expect(fs.writeFileSync).not.toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalledTimes(1);
@@ -601,7 +601,7 @@ describe('Publish', () => {
           CURRENT_PROJECT_VERSION: { text: previousBundleVersion },
         }[value]));
 
-        await publish({ skipAndroid: true }, context);
+        await prepare({ skipAndroid: true }, context);
 
         expect(plist.build).toHaveBeenCalledTimes(1);
         expect((plist.build as jest.Mock).mock.calls[0][0].CFBundleVersion).toBe(
@@ -640,7 +640,7 @@ describe('Publish', () => {
           MARKETING_VERSION: { text: '1.1.1' },
         }[value]));
 
-        await publish({ skipAndroid: true }, context);
+        await prepare({ skipAndroid: true }, context);
 
         expect(plist.build).toHaveBeenCalledTimes(1);
         expect(plist.build).toHaveBeenCalledWith({
@@ -670,7 +670,7 @@ describe('Publish', () => {
         CURRENT_PROJECT_VERSION: { text: '1.1.1' },
       }[value]));
 
-      await publish({ skipAndroid: true, noPrerelease: true }, context);
+      await prepare({ skipAndroid: true, noPrerelease: true }, context);
 
       expect(plist.build).not.toHaveBeenCalled();
 
@@ -691,7 +691,7 @@ describe('Publish', () => {
 
       const context = createContext();
 
-      await publish({ skipAndroid: true }, context);
+      await prepare({ skipAndroid: true }, context);
 
       expect(plist.build).toHaveBeenCalledTimes(1);
       expect(plist.build).toHaveBeenCalledWith({
@@ -751,7 +751,7 @@ describe('Publish', () => {
         },
       });
 
-      await publish({ skipAndroid: true, iosPackageName: 'ProjectTwo' }, context);
+      await prepare({ skipAndroid: true, iosPackageName: 'ProjectTwo' }, context);
 
       expect(plist.build).not.toHaveBeenCalled();
 
@@ -799,7 +799,7 @@ describe('Publish', () => {
         CFBundleVersion: '100',
       });
 
-      await publish({ skipAndroid: true, iosPackageName: 'ProjectOne' }, context);
+      await prepare({ skipAndroid: true, iosPackageName: 'ProjectOne' }, context);
 
       expect(plist.build).toHaveBeenCalledTimes(1);
       expect(plist.build).toHaveBeenCalledWith({
@@ -836,7 +836,7 @@ describe('Publish', () => {
           CURRENT_PROJECT_VERSION: { text: '100' },
         }[value]));
 
-        await publish({
+        await prepare({
           skipAndroid: true,
           versionStrategy: {
             ios: {
@@ -875,7 +875,7 @@ describe('Publish', () => {
         CURRENT_PROJECT_VERSION: { text: '100' },
       }[value]));
 
-      await publish({
+      await prepare({
         skipAndroid: true,
         versionStrategy: {
           ios: {
@@ -914,7 +914,7 @@ describe('Publish', () => {
         CURRENT_PROJECT_VERSION: { text: '1.1.1' },
       }[value]));
 
-      await publish({
+      await prepare({
         skipAndroid: true,
         versionStrategy: {
           ios: {
@@ -956,7 +956,7 @@ describe('Publish', () => {
           CURRENT_PROJECT_VERSION: { text: previousBundleVersion },
         }[value]));
 
-        await publish({
+        await prepare({
           skipAndroid: true,
           versionStrategy: {
             ios: {
@@ -991,7 +991,7 @@ describe('Publish', () => {
         CURRENT_PROJECT_VERSION: { text: '1.1.1' },
       }[value]));
 
-      await publish({
+      await prepare({
         skipAndroid: true,
         versionStrategy: {
           ios: {
@@ -1016,7 +1016,7 @@ describe('Publish', () => {
     it('skips a prerelease version if disabled for the platform', async () => {
       const context = createContext({ version: '1.2.3-beta.1' });
 
-      await publish({
+      await prepare({
         skipAndroid: true,
         versionStrategy: {
           ios: {
@@ -1037,7 +1037,7 @@ describe('Publish', () => {
     ])('skips a prerelease version if the versioning strategy is %s', async (strategy) => {
       const context = createContext({ version: '1.2.3-beta.1' });
 
-      await publish({
+      await prepare({
         skipAndroid: true,
         versionStrategy: {
           ios: {

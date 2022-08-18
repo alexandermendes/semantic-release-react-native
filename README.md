@@ -8,7 +8,7 @@ for versioning [React Native](https://reactnative.dev/) applications.
 | Step               | Description                           |
 |--------------------|---------------------------------------|
 | `verifyConditions` | Validate configuration.               |
-| `publish`          | Version native iOS and Android files. |
+| `prepare`          | Version native iOS and Android files. |
 
 ## Installation
 

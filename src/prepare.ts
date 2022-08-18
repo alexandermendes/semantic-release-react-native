@@ -23,7 +23,7 @@ const applyPluginConfigDefaults = (pluginConfig: PluginConfig): FullPluginConfig
   },
 }, pluginConfig);
 
-export const publish = async (
+export const prepare = async (
   pluginConfig: PluginConfig,
   context: Context,
 ) => {

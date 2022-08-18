@@ -1,2 +1,2 @@
-export { publish } from './publish';
+export { prepare } from './prepare';
 export { verifyConditons } from './verify';

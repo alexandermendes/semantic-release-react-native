@@ -34,7 +34,7 @@
     "react-native",
     "version",
     "release",
-    "publish"
+    "prepare"
   ],
   "peerDependencies": {
     "semantic-release": "*"
