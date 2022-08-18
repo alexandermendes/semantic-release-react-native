@@ -6,6 +6,7 @@ import { Xcode } from 'pbxproj-dom/xcode';
 import unique from 'lodash.uniq';
 import detectIndent from 'detect-indent';
 import flattenDeep from 'lodash.flattendeep';
+import htmlMinifier from 'html-minifier'
 import type { Context } from 'semantic-release';
 import type { FullPluginConfig } from '../types';
 import { toAbsolutePath } from '../paths';
@@ -266,6 +267,32 @@ const updateCfBundleShortVersion = (
 };
 
 /**
+ * Reset empty tags to those defined in the original file.
+ *
+ * Basically avoid converting <string /> to <string/> etc. as part of the effort
+ * to end up with plist updates made in this plugin only modifying the version
+ * fields and leaving anything else alone.
+ */
+const resetEmptyTagStyles = (originalContent: string, newContent: string) => {
+  const originalLines = originalContent.trim().split(/\r?\n/);
+  const newLines = newContent.trim().split(/\r?\n/);
+
+  if (originalLines.length !== newLines.length) {
+    return newContent;
+  }
+
+  return newLines.map((newLine, index) => {
+    const originalLine = originalLines[index];
+
+    if (htmlMinifier.minify(newLine).trim() === htmlMinifier.minify(originalLine).trim()) {
+      return originalLine;
+    }
+
+    return newLine;
+  }).join('\n');
+};
+
+/**
  * Increment version numbers in all plist files.
  */
 const incrementPlistVersions = (
@@ -299,7 +326,8 @@ const incrementPlistVersions = (
 
       const indent = detectIndent(originalPlistFile);
       const dictPattern = /<dict>[\s\S]*<\/dict>/i;
-      const newPlistContent = plist.build(plistObj).match(dictPattern)?.[0] ?? '';
+      const newPlistFile = plist.build(plistObj);
+      const newPlistContent = newPlistFile.match(dictPattern)?.[0] ?? '';
 
       const [xmlDeclaration] = originalPlistFile.match(/<\?xml.*\?>/i) ?? [];
       const [doctypeElement] = originalPlistFile.match(/<\?doctype.*\?>/i) ?? [];
@@ -312,20 +340,23 @@ const incrementPlistVersions = (
         beautifyOpts.indent_size = indent.amount;
       }
 
-      let cleanPlistFile = `${[
+      let cleanPlistFile = [
         xmlDeclaration ?? '<?xml version="1.0" encoding="UTF-8"?>',
         doctypeElement ?? '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">',
         plistElement ?? '<plist version="1.0">',
         newPlistContent,
         '</plist>',
-      ].join('\n')}\n`;
+      ].join('\n');
 
       cleanPlistFile = cleanPlistFile.replace(
         dictPattern,
         beautify.html(newPlistContent, beautifyOpts),
       );
 
-      fs.writeFileSync(plistPath, cleanPlistFile);
+      fs.writeFileSync(
+        plistPath,
+        `${resetEmptyTagStyles(originalPlistFile, cleanPlistFile)}\n`,
+      );
     });
 };
 

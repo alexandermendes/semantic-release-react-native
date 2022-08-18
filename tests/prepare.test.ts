@@ -448,6 +448,12 @@ describe('prepare', () => {
             '  <string>en</string>',
             '  <key>CFBundleDisplayName</key>',
             '  <string>My App</string>',
+            '  <key>LSRequiresIPhoneOS</key>',
+            '  <true/>',
+            '  <key>CodePushDeploymentKey</key>',
+            '  <string />',
+            '  <key>NSLocationWhenInUseUsageDescription</key>',
+            '  <string></string>',
             '</dict>',
             '</plist>',
           ].join('\n');
