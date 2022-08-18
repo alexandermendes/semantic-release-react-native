@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.7.0...v1.8.0) (2022-08-18)
+
+
+### Features
+
+* leave empty tags in plist files alone ([3ef36e8](https://github.com/alexandermendes/semantic-release-react-native/commit/3ef36e87ac7037d8ce4b2b9b93731f6deb3a7968))
+
 # [1.7.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.6.2...v1.7.0) (2022-08-18)
 
 
