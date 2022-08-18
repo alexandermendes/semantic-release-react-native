@@ -1,3 +1,10 @@
+## [1.6.2](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.6.1...v1.6.2) (2022-08-18)
+
+
+### Bug Fixes
+
+* version native files from prepare rather than publish ([b647445](https://github.com/alexandermendes/semantic-release-react-native/commit/b64744532620c6c1afa17d32c69fd942b991949e))
+
 ## [1.6.1](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.6.0...v1.6.1) (2022-08-13)
 
 
