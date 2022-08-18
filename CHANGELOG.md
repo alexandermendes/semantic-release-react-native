@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.6.2...v1.7.0) (2022-08-18)
+
+
+### Features
+
+* leave current indents alone ([d3d00b9](https://github.com/alexandermendes/semantic-release-react-native/commit/d3d00b96bbcda5e43923894d0944221b1c279abe))
+
 ## [1.6.2](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.6.1...v1.6.2) (2022-08-18)
 
 
