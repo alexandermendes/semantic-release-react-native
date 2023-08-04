@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.8.0...v1.8.1) (2023-08-04)
+
+
+### Bug Fixes
+
+* strip double quotes from MARKETING_VERSION ([350f3a7](https://github.com/alexandermendes/semantic-release-react-native/commit/350f3a7f8258d7e35ae9482b93c6893222f0e5bd))
+
 # [1.8.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.7.0...v1.8.0) (2022-08-18)
 
 
