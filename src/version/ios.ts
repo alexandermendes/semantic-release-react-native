@@ -201,6 +201,18 @@ const incrementPbxProjectBuildNumbers = (
   });
 
   xcode.save();
+
+  // Strip double quotes from version strings.
+  const versionRE = new RegExp(`([${currentProjectVersionKey}|${marketingVersionKey}]) = "(.*)"`, 'gm');
+  const xcodeDoc = fs.readFileSync(xcode.path, { encoding: 'utf-8' });
+
+  if (!xcodeDoc) {
+    throw new Error(`Could not read Xcode project file at ${xcode.path}`);
+  }
+
+  const updatedXcodeDoc = xcodeDoc.replace(versionRE, '$1 = $2');
+
+  fs.writeFileSync(xcode.path, updatedXcodeDoc, { encoding: 'utf8' });
 };
 
 /**

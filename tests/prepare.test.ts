@@ -27,6 +27,7 @@ const createContext = ({
 
 const defaultAndroidPath = `${appRoot.path}/android/app/build.gradle`;
 const defaultIosPath = `${appRoot.path}/ios`;
+const xcodePath = 'ios/App/project.pbxproj';
 
 const getBuildSetting = jest.fn((value: string) => ({
   INFOPLIST_FILE: { text: 'Test/Info.plist' },
@@ -48,6 +49,7 @@ const buildConfig = {
 
 const mockXcode = {
   save: jest.fn(),
+  path: xcodePath,
   document: {
     projects: [
       {
@@ -459,6 +461,13 @@ describe('prepare', () => {
           ].join('\n');
         }
 
+        if (filePath === xcodePath) {
+          return [
+            'MARKETING_VERSION = "1.0.0";',
+            'abc123 = { buildSettings = { CURRENT_PROJECT_VERSION = 1; }; };',
+          ].join('\n');
+        }
+
         return null;
       });
 
@@ -499,7 +508,6 @@ describe('prepare', () => {
 
       expect(mockXcode.save).toHaveBeenCalled();
 
-      expect(fs.readFileSync).toHaveBeenCalledTimes(1);
       expect(fs.readFileSync).toHaveBeenCalledWith(
         `${appRoot.path}/ios/Test/Info.plist`,
       );
@@ -510,7 +518,6 @@ describe('prepare', () => {
 
       await prepare({ skipAndroid: true }, context);
 
-      expect(fs.readFileSync).toHaveBeenCalledTimes(1);
       expect(fs.readFileSync).toHaveBeenCalledWith(
         `${appRoot.path}/ios/Test/Info.plist`,
       );
@@ -525,13 +532,12 @@ describe('prepare', () => {
         CFBundleVersion: '100.1.1',
       });
 
-      expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
       expect(fs.writeFileSync).toHaveBeenCalledWith(
         `${appRoot.path}/ios/Test/Info.plist`,
         expect.any(String),
       );
 
-      expect((fs.writeFileSync as jest.Mock).mock.calls[0][1]).toMatchSnapshot();
+      expect((fs.writeFileSync as jest.Mock).mock.calls[1][1]).toMatchSnapshot();
     });
 
     it.each`
@@ -610,6 +616,21 @@ describe('prepare', () => {
       expect(logger.error).toHaveBeenCalledTimes(1);
       expect(logger.error).toHaveBeenCalledWith(
         `No Xcode project file found at ${defaultIosPath}`,
+      );
+    });
+
+    it('replaces any double quotes in the project.pbxproj file', async () => {
+      const context = createContext();
+
+      await prepare({ skipAndroid: true }, context);
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        xcodePath,
+        [
+          'MARKETING_VERSION = 1.0.0;',
+          'abc123 = { buildSettings = { CURRENT_PROJECT_VERSION = 1; }; };',
+        ].join('\n'),
+        { encoding: 'utf8' },
       );
     });
 
@@ -758,6 +779,7 @@ describe('prepare', () => {
 
       (Xcode.open as jest.Mock).mockReturnValue({
         save: jest.fn(),
+        path: xcodePath,
         document: {
           projects: [
             {
@@ -801,6 +823,7 @@ describe('prepare', () => {
 
       (Xcode.open as jest.Mock).mockReturnValue({
         save: jest.fn(),
+        path: xcodePath,
         document: {
           projects: [
             {
