@@ -1,3 +1,10 @@
+## [1.8.2](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.8.1...v1.8.2) (2023-08-14)
+
+
+### Bug Fixes
+
+* tweak pbxproj double quote replacement ([d19fb90](https://github.com/alexandermendes/semantic-release-react-native/commit/d19fb90d7bdba5e2fb8666af0eee1b64fc23c761))
+
 ## [1.8.1](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.8.0...v1.8.1) (2023-08-04)
 
 
