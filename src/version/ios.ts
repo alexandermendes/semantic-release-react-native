@@ -203,7 +203,7 @@ const incrementPbxProjectBuildNumbers = (
   xcode.save();
 
   // Strip double quotes from version strings.
-  const versionRE = new RegExp(`([${currentProjectVersionKey}|${marketingVersionKey}]) = "(.*)"`, 'gm');
+  const versionRE = new RegExp(`(${currentProjectVersionKey}|${marketingVersionKey}) = "([^"]*)"`, 'gm');
   const xcodeDoc = fs.readFileSync(xcode.path, { encoding: 'utf-8' });
 
   if (!xcodeDoc) {

@@ -464,7 +464,13 @@ describe('prepare', () => {
         if (filePath === xcodePath) {
           return [
             'MARKETING_VERSION = "1.0.0";',
-            'abc123 = { buildSettings = { CURRENT_PROJECT_VERSION = 1; }; };',
+            'abc123 = {',
+            '  buildSettings = {',
+            '    CURRENT_PROJECT_VERSION = "6.26.0";',
+            '    INFOPLIST_FILE = "iOS (Extension)/Info.plist";',
+            '    PRODUCT_NAME = "My Project";',
+            '  };',
+            '};',
           ].join('\n');
         }
 
@@ -619,7 +625,7 @@ describe('prepare', () => {
       );
     });
 
-    it('replaces any double quotes in the project.pbxproj file', async () => {
+    it('replaces any double quotes for the MARKETING_VERSION and CURRENT_PROJECT_VERSION in the project.pbxproj file', async () => {
       const context = createContext();
 
       await prepare({ skipAndroid: true }, context);
@@ -628,7 +634,13 @@ describe('prepare', () => {
         xcodePath,
         [
           'MARKETING_VERSION = 1.0.0;',
-          'abc123 = { buildSettings = { CURRENT_PROJECT_VERSION = 1; }; };',
+          'abc123 = {',
+          '  buildSettings = {',
+          '    CURRENT_PROJECT_VERSION = 6.26.0;',
+          '    INFOPLIST_FILE = "iOS (Extension)/Info.plist";',
+          '    PRODUCT_NAME = "My Project";',
+          '  };',
+          '};',
         ].join('\n'),
         { encoding: 'utf8' },
       );
