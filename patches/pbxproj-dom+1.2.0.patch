@@ -1,0 +1,196 @@
+diff --git a/node_modules/pbxproj-dom/parser.js b/node_modules/pbxproj-dom/parser.js
+index 397475d..b458289 100644
+--- a/node_modules/pbxproj-dom/parser.js
++++ b/node_modules/pbxproj-dom/parser.js
+@@ -174,18 +174,20 @@ function peg$parse(input, options) {
+       peg$c30 = peg$literalExpectation("\\'", false),
+       peg$c31 = "\\n",
+       peg$c32 = peg$literalExpectation("\\n", false),
+-      peg$c33 = function(s1, content) { return new ast.StringBlock(s1, content); },
+-      peg$c34 = function(content) { return new ast.Space(content); },
+-      peg$c35 = /^[ \t\n\r]/,
+-      peg$c36 = peg$classExpectation([" ", "\t", "\n", "\r"], false, false),
+-      peg$c37 = function(ws) { return new ast.WhiteSpace(ws); },
+-      peg$c38 = "/*",
+-      peg$c39 = peg$literalExpectation("/*", false),
+-      peg$c40 = /^[^*]/,
+-      peg$c41 = peg$classExpectation(["*"], true, false),
+-      peg$c42 = "*/",
+-      peg$c43 = peg$literalExpectation("*/", false),
+-      peg$c44 = function(content) { return new ast.CommentBlock(content); },
++      peg$c33 = "\\",
++      peg$c34 = peg$literalExpectation("\\", false),
++      peg$c35 = function(s1, content) { return new ast.StringBlock(s1, content); },
++      peg$c36 = function(content) { return new ast.Space(content); },
++      peg$c37 = /^[ \t\n\r]/,
++      peg$c38 = peg$classExpectation([" ", "\t", "\n", "\r"], false, false),
++      peg$c39 = function(ws) { return new ast.WhiteSpace(ws); },
++      peg$c40 = "/*",
++      peg$c41 = peg$literalExpectation("/*", false),
++      peg$c42 = /^[^*]/,
++      peg$c43 = peg$classExpectation(["*"], true, false),
++      peg$c44 = "*/",
++      peg$c45 = peg$literalExpectation("*/", false),
++      peg$c46 = function(content) { return new ast.CommentBlock(content); },
+ 
+       peg$currPos          = 0,
+       peg$savedPos         = 0,
+@@ -698,6 +700,15 @@ function peg$parse(input, options) {
+                 s5 = peg$FAILED;
+                 if (peg$silentFails === 0) { peg$fail(peg$c32); }
+               }
++              if (s5 === peg$FAILED) {
++                if (input.charCodeAt(peg$currPos) === 92) {
++                  s5 = peg$c33;
++                  peg$currPos++;
++                } else {
++                  s5 = peg$FAILED;
++                  if (peg$silentFails === 0) { peg$fail(peg$c34); }
++                }
++              }
+             }
+           }
+         }
+@@ -734,6 +745,15 @@ function peg$parse(input, options) {
+                   s5 = peg$FAILED;
+                   if (peg$silentFails === 0) { peg$fail(peg$c32); }
+                 }
++                if (s5 === peg$FAILED) {
++                  if (input.charCodeAt(peg$currPos) === 92) {
++                    s5 = peg$c33;
++                    peg$currPos++;
++                  } else {
++                    s5 = peg$FAILED;
++                    if (peg$silentFails === 0) { peg$fail(peg$c34); }
++                  }
++                }
+               }
+             }
+           }
+@@ -753,7 +773,7 @@ function peg$parse(input, options) {
+           }
+           if (s4 !== peg$FAILED) {
+             peg$savedPos = s0;
+-            s1 = peg$c33(s1, s3);
++            s1 = peg$c35(s1, s3);
+             s0 = s1;
+           } else {
+             peg$currPos = s0;
+@@ -793,7 +813,7 @@ function peg$parse(input, options) {
+     }
+     if (s1 !== peg$FAILED) {
+       peg$savedPos = s0;
+-      s1 = peg$c34(s1);
++      s1 = peg$c36(s1);
+     }
+     s0 = s1;
+ 
+@@ -806,22 +826,22 @@ function peg$parse(input, options) {
+     s0 = peg$currPos;
+     s1 = peg$currPos;
+     s2 = [];
+-    if (peg$c35.test(input.charAt(peg$currPos))) {
++    if (peg$c37.test(input.charAt(peg$currPos))) {
+       s3 = input.charAt(peg$currPos);
+       peg$currPos++;
+     } else {
+       s3 = peg$FAILED;
+-      if (peg$silentFails === 0) { peg$fail(peg$c36); }
++      if (peg$silentFails === 0) { peg$fail(peg$c38); }
+     }
+     if (s3 !== peg$FAILED) {
+       while (s3 !== peg$FAILED) {
+         s2.push(s3);
+-        if (peg$c35.test(input.charAt(peg$currPos))) {
++        if (peg$c37.test(input.charAt(peg$currPos))) {
+           s3 = input.charAt(peg$currPos);
+           peg$currPos++;
+         } else {
+           s3 = peg$FAILED;
+-          if (peg$silentFails === 0) { peg$fail(peg$c36); }
++          if (peg$silentFails === 0) { peg$fail(peg$c38); }
+         }
+       }
+     } else {
+@@ -834,7 +854,7 @@ function peg$parse(input, options) {
+     }
+     if (s1 !== peg$FAILED) {
+       peg$savedPos = s0;
+-      s1 = peg$c37(s1);
++      s1 = peg$c39(s1);
+     }
+     s0 = s1;
+ 
+@@ -845,31 +865,31 @@ function peg$parse(input, options) {
+     var s0, s1, s2, s3, s4;
+ 
+     s0 = peg$currPos;
+-    if (input.substr(peg$currPos, 2) === peg$c38) {
+-      s1 = peg$c38;
++    if (input.substr(peg$currPos, 2) === peg$c40) {
++      s1 = peg$c40;
+       peg$currPos += 2;
+     } else {
+       s1 = peg$FAILED;
+-      if (peg$silentFails === 0) { peg$fail(peg$c39); }
++      if (peg$silentFails === 0) { peg$fail(peg$c41); }
+     }
+     if (s1 !== peg$FAILED) {
+       s2 = peg$currPos;
+       s3 = [];
+-      if (peg$c40.test(input.charAt(peg$currPos))) {
++      if (peg$c42.test(input.charAt(peg$currPos))) {
+         s4 = input.charAt(peg$currPos);
+         peg$currPos++;
+       } else {
+         s4 = peg$FAILED;
+-        if (peg$silentFails === 0) { peg$fail(peg$c41); }
++        if (peg$silentFails === 0) { peg$fail(peg$c43); }
+       }
+       while (s4 !== peg$FAILED) {
+         s3.push(s4);
+-        if (peg$c40.test(input.charAt(peg$currPos))) {
++        if (peg$c42.test(input.charAt(peg$currPos))) {
+           s4 = input.charAt(peg$currPos);
+           peg$currPos++;
+         } else {
+           s4 = peg$FAILED;
+-          if (peg$silentFails === 0) { peg$fail(peg$c41); }
++          if (peg$silentFails === 0) { peg$fail(peg$c43); }
+         }
+       }
+       if (s3 !== peg$FAILED) {
+@@ -878,16 +898,16 @@ function peg$parse(input, options) {
+         s2 = s3;
+       }
+       if (s2 !== peg$FAILED) {
+-        if (input.substr(peg$currPos, 2) === peg$c42) {
+-          s3 = peg$c42;
++        if (input.substr(peg$currPos, 2) === peg$c44) {
++          s3 = peg$c44;
+           peg$currPos += 2;
+         } else {
+           s3 = peg$FAILED;
+-          if (peg$silentFails === 0) { peg$fail(peg$c43); }
++          if (peg$silentFails === 0) { peg$fail(peg$c45); }
+         }
+         if (s3 !== peg$FAILED) {
+           peg$savedPos = s0;
+-          s1 = peg$c44(s2);
++          s1 = peg$c46(s2);
+           s0 = s1;
+         } else {
+           peg$currPos = s0;
+diff --git a/node_modules/pbxproj-dom/parser.pegjs b/node_modules/pbxproj-dom/parser.pegjs
+index a9c49b4..329921a 100644
+--- a/node_modules/pbxproj-dom/parser.pegjs
++++ b/node_modules/pbxproj-dom/parser.pegjs
+@@ -11,7 +11,7 @@ List = s1:Space "(" content:(Value Space ",")* s2:Space ")" { return new ast.Lis
+ // Id used to be [a-zA-Z0-9\/\\_]* but characters such as '-', '.', '$' keep breaking the parser.
+ Identifier = s1:Space id:$[^(){} \t\n\r=;,]* { return new ast.Identifier(s1, id); }
+ 
+-StringBlock = s1:Space '"' content:$([^\\\"] / '\\"' / "\\'" / '\\n')* '"' { return new ast.StringBlock(s1, content); }
++StringBlock = s1:Space '"' content:$([^\\\"] / '\\"' / "\\'" / '\\n' / '\\')* '"' { return new ast.StringBlock(s1, content); }
+ Space = content:(WhiteSpace / CommentBlock)* { return new ast.Space(content); }
+ WhiteSpace = ws:$[ \t\n\r]+ { return new ast.WhiteSpace(ws); }
+ CommentBlock = "/*" content:$[^*]* "*/" { return new ast.CommentBlock(content); }
