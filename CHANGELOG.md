@@ -1,3 +1,10 @@
+## [1.8.3](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.8.2...v1.8.3) (2024-01-18)
+
+
+### Bug Fixes
+
+* allow double backslashes in pbxproj files ([4d196e9](https://github.com/alexandermendes/semantic-release-react-native/commit/4d196e98356c481048e8618ae0313521f6b54371))
+
 ## [1.8.2](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.8.1...v1.8.2) (2023-08-14)
 
 
