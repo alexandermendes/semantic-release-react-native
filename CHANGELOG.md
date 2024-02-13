@@ -1,3 +1,10 @@
+## [1.8.4](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.8.3...v1.8.4) (2024-02-13)
+
+
+### Bug Fixes
+
+* kill ios pre-release mechanism ([f06b117](https://github.com/alexandermendes/semantic-release-react-native/commit/f06b1171127b7b49ed5779edb90d2a5bd119b8df))
+
 ## [1.8.3](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.8.2...v1.8.3) (2024-01-18)
 
 
