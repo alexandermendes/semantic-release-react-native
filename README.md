@@ -213,33 +213,16 @@ as the `vesionName`, so this is what we do.
 
 ### iOS
 
-For iOS, the `CFBundleShortVersionString`
-property [does not support pre-release versions](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html#//apple_ref/doc/uid/20001431-111349),
-so this plugin will be strip and pre-release labels from the version set against
-this property (e.g. `1.2.3-beta.1` becomes `1.2.3`).
+For iOS, the [`CFBundleShortVersionString`](https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleshortversionstring) and [`CFBundleVersion`](https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleversion) do not support pre-release versions. Because of this
+we do not append any pre-release identifiers for iOS.
 
-However, the `CFBundleVersion` [does have some provision for specifying
-pre-release versions](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html#//apple_ref/doc/uid/20001431-102364), in that
-it allows a character in the set [**abdf**] followed by a number between 1 and 255
-to be set as a suffix after the version number.
-
-This plugin makes use of this feature of `CFBundleVersion` in an attempt to help
-identify pre-release versions when you upload your app via App Store Connect,
-while still complying with the documented guidelines.
-
-It does this by taking the first character of your pre-release label and, if that
-character is one of those in the allowed character set, uses that as the suffix
-along with the pre-release version. If the character is not one of those in the
-allowed set we fall back to the letter `f`. For example, if the next bundle
-version is `1000.1.1` then:
-
-- `1.2.3-alpha.1` > `1000.1.1a1`
-- `1.2.3-beta.3` > `1000.1.1b3`
-- `1.2.3-feature.42` > `1000.1.1f42`
-- `1.2.3-hello.1` > `1000.1.1f1`
-
-Note that this feature only works when using the `strict` versioning strategy
-for iOS (which is the default).
+For iOS apps, build numbers must be unique within each release train, which may cause issues if
+you push a pre-release to TestFlight with a given build number then merge your work and try to
+push again with the same build number. However, build numbers
+**do not need to be unique across different release trains**. Therefore, the recommended
+way of handling your pre-release builds is to create a separate release train for your
+pre-release builds. See the iOS docs on (Version Numbers and Build Numbers
+)[https://developer.apple.com/library/archive/technotes/tn2420/_index.html] for more details.
 
 ## Xcode project files
 

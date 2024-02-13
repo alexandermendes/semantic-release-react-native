@@ -24,7 +24,7 @@ const getIosPath = (iosPath?: string) => {
 /**
  * Get the bundle version for iOS using the strict strategy.
  */
-const getIosStrictBundleVersion = (currentBundleVersion: string, version: string) => {
+const getIosStrictBundleVersion = (currentBundleVersion: string) => {
   const [majorStr, minorStr, patchStr] = currentBundleVersion.split('.');
   let major = parseInt(majorStr ?? 0, 10);
   let minor = parseInt(minorStr ?? 0, 10);
@@ -63,24 +63,7 @@ const getIosStrictBundleVersion = (currentBundleVersion: string, version: string
     patch += 1;
   }
 
-  let bundleVersion = `${major}.${minor}.${patch}`;
-
-  const [, preReleaseLabel] = version.split('-');
-
-  if (!preReleaseLabel) {
-    return bundleVersion;
-  }
-
-  const preReleaseChar = preReleaseLabel[0];
-  const validPreReleaseChar = ['a', 'b', 'd', 'f'].includes(preReleaseChar)
-    ? preReleaseChar
-    : 'f';
-
-  const preReleaseVersion = parseInt(preReleaseLabel.split('.')[1] ?? 1, 10);
-
-  bundleVersion += `${validPreReleaseChar}${preReleaseVersion}`;
-
-  return bundleVersion;
+  return `${major}.${minor}.${patch}`;
 };
 
 /**
@@ -116,7 +99,7 @@ const getIosBundleVersion = (
     return String(major + 1);
   }
 
-  return getIosStrictBundleVersion(currentBundleVersion, version);
+  return getIosStrictBundleVersion(currentBundleVersion);
 };
 
 /**

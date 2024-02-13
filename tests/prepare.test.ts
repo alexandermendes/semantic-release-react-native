@@ -688,16 +688,16 @@ describe('prepare', () => {
     );
 
     it.each`
-      version               | previousBundleVersion | expectedBundleVersion
-      ${'1.2.3-alpha.1'}    | ${'1.1.1'}            | ${'1.1.2a1'}
-      ${'1.2.3-beta.3'}     | ${'1.1.1'}            | ${'1.1.2b3'}
-      ${'1.2.3-feature.42'} | ${'1.1.1'}            | ${'1.1.2f42'}
-      ${'1.2.3-hello.12'}   | ${'1.1.1'}            | ${'1.1.2f12'}
-      ${'1.2.3-alpha.2'}    | ${'1.1.1a1'}          | ${'1.1.2a2'}
-      ${'1.2.3-beta.1'}     | ${'1.1.1a1'}          | ${'1.1.2b1'}
+      version               | previousBundleVersion
+      ${'1.2.3-alpha.1'}    | ${'1.1.1'}            
+      ${'1.2.3-beta.3'}     | ${'1.1.1'}            
+      ${'1.2.3-feature.42'} | ${'1.1.1'}            
+      ${'1.2.3-hello.12'}   | ${'1.1.1'}            
+      ${'1.2.3-alpha.2'}    | ${'1.1.1a1'}          
+      ${'1.2.3-beta.1'}     | ${'1.1.1a1'}         
     `(
-      'sets the bundle version to $expectedBundleVersion for version $version',
-      async ({ version, previousBundleVersion, expectedBundleVersion }) => {
+      'sets the bundle version to 1.1.2 for version $version',
+      async ({ version, previousBundleVersion }) => {
         const context = createContext({ version });
 
         (plist.parse as jest.Mock).mockReturnValue({
@@ -715,13 +715,13 @@ describe('prepare', () => {
         expect(plist.build).toHaveBeenCalledTimes(1);
         expect(plist.build).toHaveBeenCalledWith({
           CFBundleShortVersionString: '1.2.3',
-          CFBundleVersion: expectedBundleVersion,
+          CFBundleVersion: '1.1.2',
         });
 
         expect(buildConfig.patch).toHaveBeenCalledTimes(1);
         expect(buildConfig.patch).toHaveBeenCalledWith({
           buildSettings: {
-            CURRENT_PROJECT_VERSION: expectedBundleVersion,
+            CURRENT_PROJECT_VERSION: '1.1.2',
             MARKETING_VERSION: '1.2.3',
           },
         });
