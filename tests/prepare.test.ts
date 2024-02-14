@@ -688,16 +688,16 @@ describe('prepare', () => {
     );
 
     it.each`
-      version               | previousBundleVersion
-      ${'1.2.3-alpha.1'}    | ${'1.1.1'}            
-      ${'1.2.3-beta.3'}     | ${'1.1.1'}            
-      ${'1.2.3-feature.42'} | ${'1.1.1'}            
-      ${'1.2.3-hello.12'}   | ${'1.1.1'}            
-      ${'1.2.3-alpha.2'}    | ${'1.1.1a1'}          
-      ${'1.2.3-beta.1'}     | ${'1.1.1a1'}         
+      version               | previousBundleVersion | expectedBundleVersion
+      ${'1.2.2-alpha.1'}    | ${'1.1.1'}            | ${'1.1.20001'}
+      ${'1.2.2-beta.3'}     | ${'1.1.1'}            | ${'1.1.20003'}
+      ${'1.2.2-feature.42'} | ${'1.1.1'}            | ${'1.1.20042'}
+      ${'1.2.2-hello.12'}   | ${'1.1.1'}            | ${'1.1.20012'}
+      ${'1.2.2-alpha.2'}    | ${'1.1.1a1'}          | ${'1.1.20002'}
+      ${'1.2.2-beta.1'}     | ${'1.1.1a1'}          | ${'1.1.20001'}       
     `(
-      'sets the bundle version to 1.1.2 for version $version',
-      async ({ version, previousBundleVersion }) => {
+      'sets the bundle version to $expectedBundleVersion for version $version',
+      async ({ version, previousBundleVersion, expectedBundleVersion }) => {
         const context = createContext({ version });
 
         (plist.parse as jest.Mock).mockReturnValue({
@@ -714,15 +714,15 @@ describe('prepare', () => {
 
         expect(plist.build).toHaveBeenCalledTimes(1);
         expect(plist.build).toHaveBeenCalledWith({
-          CFBundleShortVersionString: '1.2.3',
-          CFBundleVersion: '1.1.2',
+          CFBundleShortVersionString: version.split('-')[0],
+          CFBundleVersion: expectedBundleVersion,
         });
 
         expect(buildConfig.patch).toHaveBeenCalledTimes(1);
         expect(buildConfig.patch).toHaveBeenCalledWith({
           buildSettings: {
-            CURRENT_PROJECT_VERSION: '1.1.2',
-            MARKETING_VERSION: '1.2.3',
+            CURRENT_PROJECT_VERSION: expectedBundleVersion,
+            MARKETING_VERSION: version.split('-')[0],
           },
         });
       },

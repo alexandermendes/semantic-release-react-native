@@ -213,16 +213,16 @@ as the `vesionName`, so this is what we do.
 
 ### iOS
 
-For iOS, the [`CFBundleShortVersionString`](https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleshortversionstring) and [`CFBundleVersion`](https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleversion) do not support pre-release versions. Because of this
-we do not append any pre-release identifiers for iOS.
+For iOS, the [`CFBundleShortVersionString`](https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleshortversionstring) and [`CFBundleVersion`](https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleversion) do not support pre-release versions.
 
-For iOS apps, build numbers must be unique within each release train, which may cause issues if
-you push a pre-release to TestFlight with a given build number then merge your work and try to
-push again with the same build number. However, build numbers
-**do not need to be unique across different release trains**. Therefore, the recommended
-way of handling your pre-release builds is to create a separate release train for your
-pre-release builds. See the iOS docs on (Version Numbers and Build Numbers
-)[https://developer.apple.com/library/archive/technotes/tn2420/_index.html] for more details.
+To get around this limitation for pre-releases we generate a patch version by multiplying
+the current patch by 10,000 and adding the pre-release version. For example, if the
+current version is `1.1.1` and the next release version is `1.2.2-beta.42`
+resulting iOS version and build number will be `1.1.20042`. This should help
+avoid clashes that may otherwise happen if you are pushing pre-releases to TestFlight.
+
+Note that this feature only works when using the `strict` versioning strategy
+for iOS (which is the default).
 
 ## Xcode project files
 
