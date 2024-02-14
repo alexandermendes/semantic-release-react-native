@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.8.4...v1.9.0) (2024-02-14)
+
+
+### Features
+
+* avoid clashes when generating pre-release version numbers ([33e612c](https://github.com/alexandermendes/semantic-release-react-native/commit/33e612c68de8beac3e36e2f89684c9efb1b72fe3))
+
 ## [1.8.4](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.8.3...v1.8.4) (2024-02-13)
 
 
