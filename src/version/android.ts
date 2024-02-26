@@ -35,7 +35,8 @@ const getNextAndroidVersionCode = (
       return currentVersionCode;
     }
 
-    return semanticBuildNumber;
+    // For relative strategy, remove any leading zero, as it would be encoded as an octal number
+    return parseInt(semanticBuildNumber, 10).toString();
   }
 
   if (strategy?.buildNumber === 'relative-extended') {
