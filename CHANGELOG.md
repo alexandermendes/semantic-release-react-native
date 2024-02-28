@@ -1,3 +1,10 @@
+## [1.9.1](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.9.0...v1.9.1) (2024-02-28)
+
+
+### Bug Fixes
+
+* **android:** remove leading zero from relative version code ([#13](https://github.com/alexandermendes/semantic-release-react-native/issues/13)) ([0882396](https://github.com/alexandermendes/semantic-release-react-native/commit/0882396798c92835f5603e900d2f1a88c31a05d7))
+
 # [1.9.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.8.4...v1.9.0) (2024-02-14)
 
 
