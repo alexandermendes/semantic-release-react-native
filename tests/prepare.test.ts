@@ -197,9 +197,9 @@ describe('prepare', () => {
 
     it.each`
       version       | expectedVersionCode
-      ${'1.0.0'}    | ${'010000'}
+      ${'1.0.0'}    | ${'10000'}
       ${'10.1.10'}  | ${'100110'}
-      ${'1.12.1'}   | ${'011201'}
+      ${'1.12.1'}   | ${'11201'}
       ${'99.99.99'} | ${'999999'}
     `(
       'updates the versionCode to $expectedVersionCode for version $version when using the relative strategy',

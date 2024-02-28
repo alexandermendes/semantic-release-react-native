@@ -19,7 +19,7 @@ export const stripPrereleaseVersion = (version: string) => {
 /**
  * Get a build number that is relative to the semantic version.
  *
- * For example, v1.2.3 becomes 102030.
+ * For example, v1.2.3 becomes 10203.
  */
 export const getSemanticBuildNumber = (
   version: string,

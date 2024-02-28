@@ -101,16 +101,17 @@ It auto-increments the current `versionCode` by one for every release.
 #### `relative`
 
 Update the `versionCode` in-line with the next semantic version. For example,
-`v1.25.3` becomes `012503`, with each number in the semantic release version
+`v1.25.3` becomes `12503`, with each number in the semantic release version
 converted to two digits and the start of each number padded with zeros as necessary.
+Any leading zeros are then stripped to avoid Android encoding as an octal number.
 
 The downside to this approach is that it effectively breaks when we hit MINOR
 or PATCH versions greater than 99. When we get to version `v1.100.1`, for example,
 we would have to make a decision about whether or not we allow three digits, in
-which case this becomes `0110001` and will break when we release version `2.0.0`
-(as `1010001` > `020000`). Or we could choose to only allow two digits and strip
-the first, in which case this will break when we release version `v1.101.1`
-(as in both cases the `versionCode` would equal `011001`).
+which case this becomes `110001` and will break when we release version `2.0.0`
+(as `1010001` > `20000`). Or we could choose to only allow two digits and strip
+the last, in which case this will break when we release version `v1.101.1`
+(as in both cases the `versionCode` would equal `11001`).
 
 If you think you are unlikely to have 100 MINOR or PATCH versions then go ahead
 and use this strategy.
