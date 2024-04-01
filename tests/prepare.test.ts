@@ -446,7 +446,7 @@ describe('prepare', () => {
       'versionName "1.2.3"',
       'versionCode 123',
     ].join('\n'));
-   
+
     delete process.env.ANDROID_BUILD_NUMBER;
   });
 
