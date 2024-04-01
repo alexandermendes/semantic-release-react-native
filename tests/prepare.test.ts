@@ -429,6 +429,25 @@ describe('prepare', () => {
     });
   });
 
+  it('update versionCode using the env strategy', async () => {
+    const context = createContext();
+    process.env.ANDROID_BUILD_NUMBER = '123';
+
+    await prepare({
+      skipIos: true,
+      versionStrategy: {
+        android: {
+          buildNumber: 'env',
+        },
+      },
+    }, context);
+
+    expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+      'versionName "1.2.3"',
+      'versionCode 123',
+    ].join('\n'));
+  });
+
   describe('iOS', () => {
     beforeEach(() => {
       (fs.readdirSync as jest.Mock).mockImplementation((filePath) => {
@@ -1004,6 +1023,41 @@ describe('prepare', () => {
       expect(buildConfig.patch).toHaveBeenCalledWith({
         buildSettings: {
           CURRENT_PROJECT_VERSION: '1.1.1',
+        },
+      });
+    });
+
+    it('updates using the env versioning strategy', async () => {
+      const context = createContext({ version: '1.2.3' });
+
+      (plist.parse as jest.Mock).mockReturnValue({
+        CFBundleVersion: '1.1.1',
+      });
+      process.env.IOS_BUILD_NUMBER = '2.3.4';
+
+      getBuildSetting.mockImplementation((value: string) => ({
+        INFOPLIST_FILE: { text: 'Test/Info.plist' },
+        CURRENT_PROJECT_VERSION: { text: '1.1.1' },
+      }[value]));
+
+      await prepare({
+        skipAndroid: true,
+        versionStrategy: {
+          ios: {
+            buildNumber: 'env',
+          },
+        },
+      }, context);
+
+      expect(plist.build).toHaveBeenCalledTimes(1);
+      expect((plist.build as jest.Mock).mock.calls[0][0].CFBundleVersion).toBe(
+        '2.3.4',
+      );
+
+      expect(buildConfig.patch).toHaveBeenCalledTimes(1);
+      expect(buildConfig.patch).toHaveBeenCalledWith({
+        buildSettings: {
+          CURRENT_PROJECT_VERSION: '2.3.4',
         },
       });
     });

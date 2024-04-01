@@ -87,6 +87,10 @@ const getIosBundleVersion = (
     return currentBundleVersion;
   }
 
+  if (strategy?.buildNumber === 'env') {
+    return process.env.IOS_BUILD_NUMBER;
+  }
+
   if (strategy?.buildNumber === 'semantic') {
     return stripPrereleaseVersion(version);
   }
@@ -386,6 +390,7 @@ export const versionIos = (
       || (
         buildNumber
         && buildNumber !== 'strict'
+        && buildNumber !== 'env'
       )
     )
   ) {

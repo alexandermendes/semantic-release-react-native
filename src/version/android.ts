@@ -28,6 +28,10 @@ const getNextAndroidVersionCode = (
     return currentVersionCode;
   }
 
+  if (strategy?.buildNumber === 'env') {
+    return process.env.ANDROID_BUILD_NUMBER;
+  }
+
   if (strategy?.buildNumber === 'relative') {
     const semanticBuildNumber = getSemanticBuildNumber(version, logger, 'Android');
 
