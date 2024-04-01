@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.9.1...v1.10.0) (2024-04-01)
+
+
+### Features
+
+* added env strategy ([#14](https://github.com/alexandermendes/semantic-release-react-native/issues/14)) ([c934705](https://github.com/alexandermendes/semantic-release-react-native/commit/c934705469e0e9b5935402ef47885be8a72b6797))
+
 ## [1.9.1](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.9.0...v1.9.1) (2024-02-28)
 
 
