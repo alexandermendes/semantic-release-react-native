@@ -29,7 +29,15 @@ const getNextAndroidVersionCode = (
   }
 
   if (strategy?.buildNumber === 'env') {
-    return process.env.ANDROID_BUILD_NUMBER;
+    const envVersionCode = process.env.ANDROID_BUILD_NUMBER;
+    if (!envVersionCode) {
+      logger.warn(
+        'Could not update Android versionCode using the env strategy '
+        + 'as the ANDROID_BUILD_NUMBER could not be determined.',
+      );
+      return currentVersionCode;
+    }
+    return envVersionCode;
   }
 
   if (strategy?.buildNumber === 'relative') {

@@ -446,6 +446,37 @@ describe('prepare', () => {
       'versionName "1.2.3"',
       'versionCode 123',
     ].join('\n'));
+   
+    delete process.env.ANDROID_BUILD_NUMBER;
+  });
+
+  it('do not update versionCode using the env strategy when variable not found', async () => {
+    const context = createContext();
+
+    (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
+      if (filePath.endsWith('build.gradle')) {
+        return [
+          'versionName "1.0.0"',
+          'versionCode 100',
+        ].join('\n');
+      }
+
+      return null;
+    });
+
+    await prepare({
+      skipIos: true,
+      versionStrategy: {
+        android: {
+          buildNumber: 'env',
+        },
+      },
+    }, context);
+
+    expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+      'versionName "1.2.3"',
+      'versionCode 100',
+    ].join('\n'));
   });
 
   describe('iOS', () => {
@@ -1058,6 +1089,42 @@ describe('prepare', () => {
       expect(buildConfig.patch).toHaveBeenCalledWith({
         buildSettings: {
           CURRENT_PROJECT_VERSION: '2.3.4',
+        },
+      });
+
+      delete process.env.IOS_BUILD_NUMBER;
+    });
+
+    it('does not update using the env versioning strategy when variable not found', async () => {
+      const context = createContext({ version: '1.2.3' });
+
+      (plist.parse as jest.Mock).mockReturnValue({
+        CFBundleVersion: '1.1.1',
+      });
+
+      getBuildSetting.mockImplementation((value: string) => ({
+        INFOPLIST_FILE: { text: 'Test/Info.plist' },
+        CURRENT_PROJECT_VERSION: { text: '1.1.1' },
+      }[value]));
+
+      await prepare({
+        skipAndroid: true,
+        versionStrategy: {
+          ios: {
+            buildNumber: 'env',
+          },
+        },
+      }, context);
+
+      expect(plist.build).toHaveBeenCalledTimes(1);
+      expect((plist.build as jest.Mock).mock.calls[0][0].CFBundleVersion).toBe(
+        '1.1.1',
+      );
+
+      expect(buildConfig.patch).toHaveBeenCalledTimes(1);
+      expect(buildConfig.patch).toHaveBeenCalledWith({
+        buildSettings: {
+          CURRENT_PROJECT_VERSION: '1.1.1',
         },
       });
     });
