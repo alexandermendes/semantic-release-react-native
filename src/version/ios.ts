@@ -87,6 +87,18 @@ const getIosBundleVersion = (
     return currentBundleVersion;
   }
 
+  if (strategy?.buildNumber === 'env') {
+    const envBundleVersion = process.env.IOS_BUILD_NUMBER;
+    if (!envBundleVersion) {
+      logger.warn(
+        'Could not update iOS bundle version using the env strategy '
+        + 'as the IOS_BUILD_NUMBER could not be determined.',
+      );
+      return currentBundleVersion;
+    }
+    return envBundleVersion;
+  }
+
   if (strategy?.buildNumber === 'semantic') {
     return stripPrereleaseVersion(version);
   }
@@ -386,6 +398,7 @@ export const versionIos = (
       || (
         buildNumber
         && buildNumber !== 'strict'
+        && buildNumber !== 'env'
       )
     )
   ) {

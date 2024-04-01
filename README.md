@@ -122,6 +122,10 @@ This is similar to the `semantic` strategy described above, yet with the additio
 of the minumum API level as the first two digits, followed by a zero. It also
 faces the same downsides as the `semantic` strategy.
 
+#### `env`
+
+Read `versionCode` from environment variable `ANDROID_BUILD_NUMBER`.
+
 #### `none`
 
 Disable updates of the `versionCode`.
@@ -180,6 +184,10 @@ This strategy behaves the same as the `relative` strategy for Android.
 #### `semantic`
 
 Use the semantic version number directly.
+
+#### `env`
+
+Use the version from environment variable `IOS_BUILD_NUMBER`.
 
 #### `none`
 

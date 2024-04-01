@@ -28,6 +28,18 @@ const getNextAndroidVersionCode = (
     return currentVersionCode;
   }
 
+  if (strategy?.buildNumber === 'env') {
+    const envVersionCode = process.env.ANDROID_BUILD_NUMBER;
+    if (!envVersionCode) {
+      logger.warn(
+        'Could not update Android versionCode using the env strategy '
+        + 'as the ANDROID_BUILD_NUMBER could not be determined.',
+      );
+      return currentVersionCode;
+    }
+    return envVersionCode;
+  }
+
   if (strategy?.buildNumber === 'relative') {
     const semanticBuildNumber = getSemanticBuildNumber(version, logger, 'Android');
 

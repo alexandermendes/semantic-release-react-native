@@ -2,6 +2,7 @@ export const androidVesionStrategies = [
   'increment',
   'relative',
   'relative-extended',
+  'env',
   'none',
 ];
 
@@ -10,5 +11,6 @@ export const iosVesionStrategies = [
   'increment',
   'relative',
   'semantic',
+  'env',
   'none',
 ];
