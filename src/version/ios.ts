@@ -398,6 +398,7 @@ export const versionIos = (
       || (
         buildNumber
         && buildNumber !== 'strict'
+        && buildNumber !== 'semantic'
         && buildNumber !== 'env'
       )
     )
