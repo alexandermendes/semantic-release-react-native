@@ -11,5 +11,5 @@ jobs:
     needs: test
     uses: alexandermendes/workflows/.github/workflows/release-js-package.yml@master
     secrets:
-      SEMANTIC_RELEASE_GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_GITHUB_TOKEN }}
+      SEMANTIC_RELEASE_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
