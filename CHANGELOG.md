@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.10.0...v1.11.0) (2024-11-27)
+
+
+### Features
+
+* add support for updating from a build version file ([47a8038](https://github.com/alexandermendes/semantic-release-react-native/commit/47a803823226ace47690063a5b580eec0f7e80bf))
+
 # [1.10.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.9.1...v1.10.0) (2024-04-01)
 
 
