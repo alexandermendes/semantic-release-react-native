@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.11.0...v1.12.0) (2024-11-27)
+
+
+### Features
+
+* log slightly more when versioning from a file ([e1911ff](https://github.com/alexandermendes/semantic-release-react-native/commit/e1911ff4e15e2a402cb833eaa0b2bca61f4f820e))
+
 # [1.11.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.10.0...v1.11.0) (2024-11-27)
 
 
