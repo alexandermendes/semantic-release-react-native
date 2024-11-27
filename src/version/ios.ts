@@ -407,6 +407,8 @@ const versionFromFile = (
     ...versionFile,
     ios: nextBuildVersion,
   });
+
+  logger.success(`iOS build number > ${nextBuildVersion}`);
 };
 
 /**
@@ -442,7 +444,7 @@ export const versionIos = (
   }
 
   if (pluginConfig.fromFile) {
-    logger.info('Versioning iOS from file');
+    logger.info(`Versioning iOS from file: ${pluginConfig.fromFile}`);
     versionFromFile(pluginConfig, context, version);
 
     return;

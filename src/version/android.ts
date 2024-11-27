@@ -114,6 +114,8 @@ const versionFromFile = (
     ...versionFile,
     android: nextBuildVersion,
   });
+
+  logger.success(`Android build number > ${nextBuildVersion}`);
 };
 
 /**
@@ -142,7 +144,7 @@ export const versionAndroid = (
   }
 
   if (pluginConfig.fromFile) {
-    logger.info('Versioning Android from file');
+    logger.info(`Versioning Android from file: ${pluginConfig.fromFile}`);
     versionFromFile(pluginConfig, context, version);
 
     return;
