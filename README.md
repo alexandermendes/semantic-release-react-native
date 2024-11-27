@@ -43,16 +43,17 @@ The example configuration above will version and git commit your native files.
 
 ## Configuration
 
-| Property          | Description                                                        | Default                    |
-|-------------------|--------------------------------------------------------------------|----------------------------|
-| `androidPath`     | Path to your "android/app/build.gradle" file.                      | `android/app/build.gradle` |
-| `iosPath`         | Path to your "ios/" folder.                                        | `ios`                      |
-| `skipBuildNumber` | Do not increment the build number for either platform.             | `false`                    |
-| `skipAndroid`     | Skip Android versioning.                                           | `false`                    |
-| `skipIos`         | Skip iOS versioning.                                               | `false`                    |
-| `iosPackageName`  | Only update iOS projects that have the given name.                 | `null`                     |
-| `noPrerelease`    | Skip pre-release versions entirely for both platforms.             | `false`                    |
-| `versionStrategy` | Specifies the versioning strategies for each platform (see below). | `{"android": {"buildNumber": "increment", "preRelease": true}, "ios": {"buildNumber": "strict", "preRelease": true}}` |
+| Property          | Description                                                                    | Default                    |
+|-------------------|--------------------------------------------------------------------------------|----------------------------|
+| `androidPath`     | Path to your "android/app/build.gradle" file.                                  | `android/app/build.gradle` |
+| `iosPath`         | Path to your "ios/" folder.                                                    | `ios`                      |
+| `skipBuildNumber` | Do not increment the build number for either platform.                         | `false`                    |
+| `skipAndroid`     | Skip Android versioning.                                                       | `false`                    |
+| `skipIos`         | Skip iOS versioning.                                                           | `false`                    |
+| `iosPackageName`  | Only update iOS projects that have the given name.                             | `null`                     |
+| `noPrerelease`    | Skip pre-release versions entirely for both platforms.                         | `false`                    |
+| `fromFile`        | Use a JSON file (e.g. `.versionrc.json`) to read and write the version number. | `null`                     |
+| `versionStrategy` | Specifies the versioning strategies for each platform (see below).             | `{"android": {"buildNumber": "increment", "preRelease": true}, "ios": {"buildNumber": "strict", "preRelease": true}}` |
 
 ## Versioning strategies
 
@@ -243,3 +244,31 @@ If these variables are not present in the first place then nothing will be added
 Whether or not you choose to commit these updates is up to you. If you are not
 actually using these variables in your `Info.plist` files then they are probably
 redundant anyway.
+
+## Build version file
+
+If you do not want to update the `Info.plist` and `build.gradle` files directly you
+can read and write the build version to a JSON file instead, using the `fromFile` option.
+This can be useful for supporting Expo projects, where this version file can then be loaded
+into your [app config](https://docs.expo.dev/workflow/configuration/).
+
+You can call this file whatever you like, for example:
+
+```json
+{
+  "plugins": [
+    ["semantic-release-react-native", {
+      "fromFile": ".versionrc.json",
+    }],
+  ]
+}
+```
+
+The file will be output in the following format:
+
+```json
+{
+  "android": 5322,
+  "ios": "3837.15.99"
+}
+```

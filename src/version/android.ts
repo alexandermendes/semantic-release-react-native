@@ -3,7 +3,12 @@ import path from 'path';
 import type { Context } from 'semantic-release';
 import type { FullPluginConfig } from '../types';
 import { toAbsolutePath } from '../paths';
-import { getSemanticBuildNumber, isPreRelease } from './utils';
+import {
+  getSemanticBuildNumber,
+  isPreRelease,
+  loadBuildVersionFile,
+  writeBuildVersionFile,
+} from './utils';
 
 /**
  * Get the path to the Android bundle.gradle file.
@@ -84,6 +89,34 @@ const getNextAndroidVersionCode = (
 };
 
 /**
+ * Update a version file, rather than the build.gradle.
+ */
+const versionFromFile = (
+  { versionStrategy, fromFile, skipBuildNumber }: FullPluginConfig,
+  { logger }: Context,
+  version: string,
+) => {
+  if (skipBuildNumber) {
+    logger.info('Skipping update of Android build number');
+
+    return;
+  }
+
+  const versionFile = loadBuildVersionFile(fromFile);
+  const nextBuildVersion = getNextAndroidVersionCode(
+    versionStrategy.android,
+    logger,
+    version,
+    versionFile.android ?? '0',
+  );
+
+  writeBuildVersionFile(fromFile, {
+    ...versionFile,
+    android: nextBuildVersion,
+  });
+};
+
+/**
  * Update Android files with the new version.
  *
  * @see https://developer.android.com/studio/publish/versioning
@@ -104,6 +137,13 @@ export const versionAndroid = (
     && pluginConfig.versionStrategy.android?.preRelease === false
   ) {
     logger.info('Skipping pre-release version for Android');
+
+    return;
+  }
+
+  if (pluginConfig.fromFile) {
+    logger.info('Versioning Android from file');
+    versionFromFile(pluginConfig, context, version);
 
     return;
   }

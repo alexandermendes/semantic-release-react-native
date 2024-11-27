@@ -160,4 +160,56 @@ describe('verifyConditions', () => {
       ]);
     });
   });
+
+  describe('fromFile', () => {
+    it('errors for a non-JSON file', () => {
+      const fromFile = 'invalid.json';
+
+      (fs.readFileSync as jest.Mock).mockImplementation(() => {
+        if (fromFile) {
+          return 'not json';
+        }
+
+        return null;
+      });
+
+      const errors = verifyConditons({
+        fromFile,
+      });
+
+      expect(errors).toEqual([
+        new Error('Invalid fromFile'),
+      ]);
+    });
+
+    it('does not error for a JSON file', () => {
+      const fromFile = 'invalid.json';
+
+      (fs.readFileSync as jest.Mock).mockImplementation(() => {
+        if (fromFile) {
+          return JSON.stringify({ android: '1', ios: '1' });
+        }
+
+        return null;
+      });
+
+      const errors = verifyConditons({
+        fromFile,
+      });
+
+      expect(errors).toEqual([]);
+    });
+
+    it('does not error for a non-existant file', () => {
+      const fromFile = 'new.json';
+
+      (fs.readFileSync as jest.Mock).mockReturnValue(null);
+
+      const errors = verifyConditons({
+        fromFile,
+      });
+
+      expect(errors).toEqual([]);
+    });
+  });
 });

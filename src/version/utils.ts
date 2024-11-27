@@ -1,5 +1,10 @@
 import semver from 'semver';
 import type { Context, NextRelease } from 'semantic-release';
+import fs from 'fs';
+import path from 'path';
+import appRoot from 'app-root-path';
+import { toError } from '../errors';
+import { VersionFile } from '../types';
 
 /**
  * Strip any pre-release label from a version (e.g. 1.2.3-beta.1).
@@ -52,4 +57,39 @@ export const isPreRelease = (nextRelease?: NextRelease) => {
   const { version } = nextRelease ?? {};
 
   return version && semver.prerelease(version);
+};
+
+/**
+ * Load the build version file.
+ */
+export const loadBuildVersionFile = (fileName: string): VersionFile => {
+  const filePath = path.join(appRoot.path, fileName);
+
+  if (!fs.existsSync(filePath)) {
+    return {};
+  }
+
+  const fileContent = fs.readFileSync(filePath, 'utf8');
+  let parsedContent: VersionFile;
+
+  try {
+    parsedContent = JSON.parse(fileContent);
+  } catch (err) {
+    throw new Error(`Could not parse ${fileName}: ${toError(err).message}`);
+  }
+
+  return parsedContent;
+};
+
+/**
+ * Write a new build version file.
+ */
+export const writeBuildVersionFile = (
+  fileName: string,
+  newVersionFile: VersionFile,
+) => {
+  const filePath = path.join(appRoot.path, fileName);
+  const fileContent = JSON.stringify(newVersionFile, null, 2);
+
+  fs.writeFileSync(filePath, fileContent, 'utf8');
 };

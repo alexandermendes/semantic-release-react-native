@@ -10,7 +10,13 @@ import htmlMinifier from 'html-minifier';
 import type { Context } from 'semantic-release';
 import type { FullPluginConfig } from '../types';
 import { toAbsolutePath } from '../paths';
-import { getSemanticBuildNumber, isPreRelease, stripPrereleaseVersion } from './utils';
+import {
+  getSemanticBuildNumber,
+  isPreRelease,
+  loadBuildVersionFile,
+  stripPrereleaseVersion,
+  writeBuildVersionFile,
+} from './utils';
 
 /**
  * Get the path to the iOS Xcode project file.
@@ -376,6 +382,34 @@ const incrementPlistVersions = (
 };
 
 /**
+ * Update a version file, rather than the Info.plist and Xcode project files.
+ */
+const versionFromFile = (
+  { versionStrategy, fromFile, skipBuildNumber }: FullPluginConfig,
+  { logger }: Context,
+  version: string,
+) => {
+  if (skipBuildNumber) {
+    logger.info('Skipping update of iOS Android build number');
+
+    return;
+  }
+
+  const versionFile = loadBuildVersionFile(fromFile);
+  const nextBuildVersion = getIosBundleVersion(
+    versionStrategy.ios,
+    logger,
+    versionFile.ios ?? '0',
+    version,
+  );
+
+  writeBuildVersionFile(fromFile, {
+    ...versionFile,
+    ios: nextBuildVersion,
+  });
+};
+
+/**
  * Version iOS files.
  */
 export const versionIos = (
@@ -403,6 +437,13 @@ export const versionIos = (
     )
   ) {
     logger.info('Skipping pre-release version for iOS');
+
+    return;
+  }
+
+  if (pluginConfig.fromFile) {
+    logger.info('Versioning iOS from file');
+    versionFromFile(pluginConfig, context, version);
 
     return;
   }

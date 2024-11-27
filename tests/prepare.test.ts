@@ -28,6 +28,11 @@ const createContext = ({
 const defaultAndroidPath = `${appRoot.path}/android/app/build.gradle`;
 const defaultIosPath = `${appRoot.path}/ios`;
 const xcodePath = 'ios/App/project.pbxproj';
+const versionFileName = 'versionrc.json';
+const versionFile = {
+  android: '5322',
+  ios: '3837.15.99',
+};
 
 const getBuildSetting = jest.fn((value: string) => ({
   INFOPLIST_FILE: { text: 'Test/Info.plist' },
@@ -68,7 +73,9 @@ const mockXcode = {
 
 describe('prepare', () => {
   beforeEach(() => {
-    (fs.existsSync as jest.Mock).mockReturnValue(true);
+    (fs.existsSync as jest.Mock).mockImplementation((filePath) => new RegExp(
+      `${versionFileName}$|build.gradle$|.pbxproj$|.plist$`,
+    ).test(filePath));
   });
 
   describe('Android', () => {
@@ -79,6 +86,10 @@ describe('prepare', () => {
             'versionName "1.0.0"',
             'versionCode 100',
           ].join('\n');
+        }
+
+        if (filePath.endsWith(versionFileName)) {
+          return JSON.stringify(versionFile);
         }
 
         return null;
@@ -427,56 +438,103 @@ describe('prepare', () => {
         'versionCode 100',
       ].join('\n'));
     });
-  });
 
-  it('update versionCode using the env strategy', async () => {
-    const context = createContext();
-    process.env.ANDROID_BUILD_NUMBER = '123';
+    it('update versionCode using the env strategy', async () => {
+      const context = createContext();
+      process.env.ANDROID_BUILD_NUMBER = '123';
 
-    await prepare({
-      skipIos: true,
-      versionStrategy: {
-        android: {
-          buildNumber: 'env',
+      await prepare({
+        skipIos: true,
+        versionStrategy: {
+          android: {
+            buildNumber: 'env',
+          },
         },
-      },
-    }, context);
+      }, context);
 
-    expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
-      'versionName "1.2.3"',
-      'versionCode 123',
-    ].join('\n'));
+      expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+        'versionName "1.2.3"',
+        'versionCode 123',
+      ].join('\n'));
 
-    delete process.env.ANDROID_BUILD_NUMBER;
-  });
-
-  it('do not update versionCode using the env strategy when variable not found', async () => {
-    const context = createContext();
-
-    (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
-      if (filePath.endsWith('build.gradle')) {
-        return [
-          'versionName "1.0.0"',
-          'versionCode 100',
-        ].join('\n');
-      }
-
-      return null;
+      delete process.env.ANDROID_BUILD_NUMBER;
     });
 
-    await prepare({
-      skipIos: true,
-      versionStrategy: {
-        android: {
-          buildNumber: 'env',
-        },
-      },
-    }, context);
+    it('do not update versionCode using the env strategy when variable not found', async () => {
+      const context = createContext();
 
-    expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
-      'versionName "1.2.3"',
-      'versionCode 100',
-    ].join('\n'));
+      (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
+        if (filePath.endsWith('build.gradle')) {
+          return [
+            'versionName "1.0.0"',
+            'versionCode 100',
+          ].join('\n');
+        }
+
+        return null;
+      });
+
+      await prepare({
+        skipIos: true,
+        versionStrategy: {
+          android: {
+            buildNumber: 'env',
+          },
+        },
+      }, context);
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(defaultAndroidPath, [
+        'versionName "1.2.3"',
+        'versionCode 100',
+      ].join('\n'));
+    });
+
+    describe('from file', () => {
+      it('updates the version', async () => {
+        const context = createContext();
+
+        await prepare({ skipIos: true, fromFile: 'versionrc.json' }, context);
+
+        expect(fs.writeFileSync).toHaveBeenCalledWith(
+          `${appRoot.path}/${versionFileName}`,
+          JSON.stringify({
+            android: '5323',
+            ios: '3837.15.99',
+          }, null, 2),
+          'utf8',
+        );
+      });
+
+      it('updates the version when no previous version', async () => {
+        const context = createContext();
+        const fromFile = 'new.json';
+
+        await prepare({ skipIos: true, fromFile }, context);
+
+        expect(fs.writeFileSync).toHaveBeenCalledWith(
+          `${appRoot.path}/${fromFile}`,
+          JSON.stringify({
+            android: '1',
+          }, null, 2),
+          'utf8',
+        );
+      });
+
+      it('throws for an invalid version file', async () => {
+        const fromFile = 'invalidrc.json';
+
+        (fs.readFileSync as jest.Mock).mockReturnValue('not json');
+        (fs.existsSync as jest.Mock).mockImplementation((filePath) => (
+          filePath.endsWith(fromFile)
+        ));
+
+        const context = createContext();
+
+        await expect(async () => (
+          prepare({ skipIos: true, fromFile: 'invalidrc.json' }, context)
+        )).rejects.toThrow(`Could not parse ${fromFile}`);
+      });
+    });
   });
 
   describe('iOS', () => {
@@ -522,6 +580,10 @@ describe('prepare', () => {
             '  };',
             '};',
           ].join('\n');
+        }
+
+        if (filePath.endsWith(versionFileName)) {
+          return JSON.stringify(versionFile);
         }
 
         return null;
@@ -1242,6 +1304,53 @@ describe('prepare', () => {
 
       expect(plist.build).not.toHaveBeenCalled();
       expect(buildConfig.patch).not.toHaveBeenCalled();
+    });
+
+    describe('from file', () => {
+      it('updates the version', async () => {
+        const context = createContext();
+
+        await prepare({ skipAndroid: true, fromFile: 'versionrc.json' }, context);
+
+        expect(fs.writeFileSync).toHaveBeenCalledWith(
+          `${appRoot.path}/${versionFileName}`,
+          JSON.stringify({
+            android: '5322',
+            ios: '3837.16.1',
+          }, null, 2),
+          'utf8',
+        );
+      });
+
+      it('updates the version when no previous version', async () => {
+        const context = createContext();
+        const fromFile = 'new.json';
+
+        await prepare({ skipAndroid: true, fromFile }, context);
+
+        expect(fs.writeFileSync).toHaveBeenCalledWith(
+          `${appRoot.path}/${fromFile}`,
+          JSON.stringify({
+            ios: '1.1.1',
+          }, null, 2),
+          'utf8',
+        );
+      });
+
+      it('throws for an invalid version file', async () => {
+        const fromFile = 'invalidrc.json';
+
+        (fs.readFileSync as jest.Mock).mockReturnValue('not json');
+        (fs.existsSync as jest.Mock).mockImplementation((filePath) => (
+          filePath.endsWith(fromFile)
+        ));
+
+        const context = createContext();
+
+        await expect(async () => (
+          prepare({ skipAndroid: true, fromFile: 'invalidrc.json' }, context)
+        )).rejects.toThrow(`Could not parse ${fromFile}`);
+      });
     });
   });
 });

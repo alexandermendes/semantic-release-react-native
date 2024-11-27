@@ -23,7 +23,8 @@ type ErrorCodes = 'ENRNANDROIDPATH'
   | 'ENRNIOSPATH'
   | 'ENRNNOTBOOLEAN'
   | 'ENRNNOTSTRING'
-  | 'ENRNVERSIONSTRATEGY';
+  | 'ENRNVERSIONSTRATEGY'
+  | 'ENRNFROMFILENOTJSON';
 
 type ErrorDefinition = (key: keyof PluginConfig) => {
   message: string;
@@ -51,10 +52,39 @@ const ERROR_DEFINITIONS: Record<ErrorCodes, ErrorDefinition> = {
     message: `Invalid ${key}`,
     details: `The ${key} must comply with the schema (see docs).`,
   }),
+  ENRNFROMFILENOTJSON: (key: keyof PluginConfig) => ({
+    message: `Invalid ${key}`,
+    details: `The ${key} must point to a JSON file.`,
+  }),
 };
 
-export const getError = (key: keyof PluginConfig, code: ErrorCodes) => {
+export const getSemanticReleaseError = (key: keyof PluginConfig, code: ErrorCodes) => {
   const { message, details } = ERROR_DEFINITIONS[code](key);
 
   return new SemanticReleaseError(message, code, details);
+};
+
+const isError = (error: unknown): error is Error => (
+  typeof error === 'object'
+  && error !== null
+  && 'message' in error
+  && typeof (error as Record<string, unknown>).message === 'string'
+);
+
+export const toError = (maybeError: unknown): Error => {
+  if (isError(maybeError)) {
+    return maybeError;
+  }
+
+  if (typeof maybeError === 'string') {
+    return new Error(maybeError);
+  }
+
+  try {
+    return new Error(JSON.stringify(maybeError));
+  } catch {
+    // Fallback in case there's an error stringifying the maybeError,
+    // like with circular references, for example.
+    return new Error(String(maybeError));
+  }
 };

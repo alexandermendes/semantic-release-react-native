@@ -12,6 +12,7 @@ export type PluginConfig = {
   skipAndroid?: boolean;
   skipIos?: boolean;
   noPrerelease?: boolean;
+  fromFile?: string;
   versionStrategy?: {
     android?: {
       buildNumber?: AndroidVersionStrategies;
@@ -25,3 +26,8 @@ export type PluginConfig = {
 };
 
 export type FullPluginConfig = Required<PluginConfig>;
+
+export type VersionFile = {
+  android?: string;
+  ios?: string;
+};
