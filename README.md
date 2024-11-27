@@ -252,7 +252,18 @@ can read and write the build version to a JSON file instead, using the `fromFile
 This can be useful for supporting Expo projects, where this version file can then be loaded
 into your [app config](https://docs.expo.dev/workflow/configuration/).
 
-You can call this file whatever you like, for example:
+The file will be output in the following format:
+
+```json
+{
+  "android": 5322,
+  "ios": "3837.15.99"
+}
+```
+
+The example below configures the `semantic-release-react-native` plugin to write the
+build numbers to the `versionrc.json` file, then commits this using the
+[`@semantic-release/git`](https://github.com/semantic-release/git) plugin.
 
 ```json
 {
@@ -260,15 +271,9 @@ You can call this file whatever you like, for example:
     ["semantic-release-react-native", {
       "fromFile": ".versionrc.json",
     }],
+    ["@semantic-release/git", {
+      "assets": [".versionrc.json"],
+    }],
   ]
-}
-```
-
-The file will be output in the following format:
-
-```json
-{
-  "android": 5322,
-  "ios": "3837.15.99"
 }
 ```
