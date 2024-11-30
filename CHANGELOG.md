@@ -1,3 +1,10 @@
+## [1.12.1](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.12.0...v1.12.1) (2024-11-30)
+
+
+### Bug Fixes
+
+* add new line at end of written version file ([fc95519](https://github.com/alexandermendes/semantic-release-react-native/commit/fc95519021a20597e61df7897bb7a8019fcdb9c5))
+
 # [1.12.0](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.11.0...v1.12.0) (2024-11-27)
 
 
