@@ -1,5 +1,6 @@
 import appRoot from 'app-root-path';
 import fs from 'fs';
+import { EOL } from 'os';
 import { Xcode } from 'pbxproj-dom/xcode';
 import plist from 'plist';
 import type { Context } from 'semantic-release';
@@ -495,14 +496,18 @@ describe('prepare', () => {
 
         await prepare({ skipIos: true, fromFile: 'versionrc.json' }, context);
 
+        const filePath = `${appRoot.path}/${versionFileName}`;
+
         expect(fs.writeFileSync).toHaveBeenCalledWith(
-          `${appRoot.path}/${versionFileName}`,
+          filePath,
           JSON.stringify({
             android: '5323',
             ios: '3837.15.99',
           }, null, 2),
           'utf8',
         );
+
+        expect(fs.appendFileSync).toHaveBeenCalledWith(filePath, EOL, 'utf8');
       });
 
       it('updates the version when no previous version', async () => {
@@ -1312,14 +1317,18 @@ describe('prepare', () => {
 
         await prepare({ skipAndroid: true, fromFile: 'versionrc.json' }, context);
 
+        const filePath = `${appRoot.path}/${versionFileName}`;
+
         expect(fs.writeFileSync).toHaveBeenCalledWith(
-          `${appRoot.path}/${versionFileName}`,
+          filePath,
           JSON.stringify({
             android: '5322',
             ios: '3837.16.1',
           }, null, 2),
           'utf8',
         );
+
+        expect(fs.appendFileSync).toHaveBeenCalledWith(filePath, EOL, 'utf8');
       });
 
       it('updates the version when no previous version', async () => {

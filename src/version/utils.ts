@@ -1,6 +1,7 @@
 import semver from 'semver';
 import type { Context, NextRelease } from 'semantic-release';
 import fs from 'fs';
+import { EOL } from 'os';
 import path from 'path';
 import appRoot from 'app-root-path';
 import { toError } from '../errors';
@@ -92,4 +93,5 @@ export const writeBuildVersionFile = (
   const fileContent = JSON.stringify(newVersionFile, null, 2);
 
   fs.writeFileSync(filePath, fileContent, 'utf8');
+  fs.appendFileSync(filePath, EOL, 'utf8');
 };
