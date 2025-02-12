@@ -4,6 +4,7 @@ import type { FullPluginConfig, PluginConfig } from './types';
 import { versionAndroid } from './version/android';
 import { versionIos } from './version/ios';
 import { isPreRelease } from './version/utils';
+import { hasDependency } from './dependencies';
 
 const applyPluginConfigDefaults = (pluginConfig: PluginConfig): FullPluginConfig => deepmerge({
   androidPath: 'android/app/build.gradle',
@@ -29,6 +30,12 @@ export const prepare = async (
 ) => {
   const pConfig = applyPluginConfigDefaults(pluginConfig);
   const { logger, nextRelease } = context;
+
+  if (!hasDependency('react-native')) {
+    logger.info('Skipping because the project does not have react-native as a dependency');
+
+    return;
+  }
 
   if (isPreRelease(nextRelease) && pluginConfig.noPrerelease) {
     logger.info('Skipping pre-release version');

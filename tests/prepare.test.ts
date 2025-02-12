@@ -93,6 +93,14 @@ describe('prepare', () => {
           return JSON.stringify(versionFile);
         }
 
+        if (filePath.endsWith('package.json')) {
+          return JSON.stringify({
+            dependencies: {
+              'react-native': '0.63.3',
+            },
+          });
+        }
+
         return null;
       });
     });
@@ -110,7 +118,7 @@ describe('prepare', () => {
       expect(fs.existsSync).toHaveBeenCalledTimes(1);
       expect(fs.existsSync).toHaveBeenCalledWith(defaultAndroidPath);
 
-      expect(fs.readFileSync).toHaveBeenCalledTimes(1);
+      expect(fs.readFileSync).toHaveBeenCalledTimes(2);
       expect(fs.readFileSync).toHaveBeenCalledWith(defaultAndroidPath);
     });
 
@@ -190,7 +198,7 @@ describe('prepare', () => {
       expect(fs.existsSync).toHaveBeenCalledTimes(1);
       expect(fs.existsSync).toHaveBeenCalledWith(`${appRoot.path}/${androidPath}`);
 
-      expect(fs.readFileSync).toHaveBeenCalledTimes(1);
+      expect(fs.readFileSync).toHaveBeenCalledTimes(2);
       expect(fs.readFileSync).toHaveBeenCalledWith(`${appRoot.path}/${androidPath}`);
     });
 
@@ -203,7 +211,7 @@ describe('prepare', () => {
       expect(fs.existsSync).toHaveBeenCalledTimes(1);
       expect(fs.existsSync).toHaveBeenCalledWith(androidPath);
 
-      expect(fs.readFileSync).toHaveBeenCalledTimes(1);
+      expect(fs.readFileSync).toHaveBeenCalledTimes(2);
       expect(fs.readFileSync).toHaveBeenCalledWith(androidPath);
     });
 
@@ -252,6 +260,14 @@ describe('prepare', () => {
             ].join('\n');
           }
 
+          if (filePath.endsWith('package.json')) {
+            return JSON.stringify({
+              dependencies: {
+                'react-native': '0.63.3',
+              },
+            });
+          }
+
           return null;
         });
 
@@ -285,6 +301,14 @@ describe('prepare', () => {
             'versionName "1.0.0"',
             'versionCode 100',
           ].join('\n');
+        }
+
+        if (filePath.endsWith('package.json')) {
+          return JSON.stringify({
+            dependencies: {
+              'react-native': '0.63.3',
+            },
+          });
         }
 
         return null;
@@ -323,6 +347,14 @@ describe('prepare', () => {
           ].join('\n');
         }
 
+        if (filePath.endsWith('package.json')) {
+          return JSON.stringify({
+            dependencies: {
+              'react-native': '0.63.3',
+            },
+          });
+        }
+
         return null;
       });
 
@@ -357,6 +389,14 @@ describe('prepare', () => {
             'versionName "1.0.0"',
             'versionCode 100',
           ].join('\n');
+        }
+
+        if (filePath.endsWith('package.json')) {
+          return JSON.stringify({
+            dependencies: {
+              'react-native': '0.63.3',
+            },
+          });
         }
 
         return null;
@@ -394,6 +434,14 @@ describe('prepare', () => {
             'versionName "1.0.0"',
             'versionCode 100',
           ].join('\n');
+        }
+
+        if (filePath.endsWith('package.json')) {
+          return JSON.stringify({
+            dependencies: {
+              'react-native': '0.63.3',
+            },
+          });
         }
 
         return null;
@@ -472,6 +520,14 @@ describe('prepare', () => {
           ].join('\n');
         }
 
+        if (filePath.endsWith('package.json')) {
+          return JSON.stringify({
+            dependencies: {
+              'react-native': '0.63.3',
+            },
+          });
+        }
+
         return null;
       });
 
@@ -528,7 +584,18 @@ describe('prepare', () => {
       it('throws for an invalid version file', async () => {
         const fromFile = 'invalidrc.json';
 
-        (fs.readFileSync as jest.Mock).mockReturnValue('not json');
+        (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
+          if (filePath.endsWith('package.json')) {
+            return JSON.stringify({
+              dependencies: {
+                'react-native': '0.63.3',
+              },
+            });
+          }
+
+          return 'not json';
+        });
+
         (fs.existsSync as jest.Mock).mockImplementation((filePath) => (
           filePath.endsWith(fromFile)
         ));
@@ -589,6 +656,14 @@ describe('prepare', () => {
 
         if (filePath.endsWith(versionFileName)) {
           return JSON.stringify(versionFile);
+        }
+
+        if (filePath.endsWith('package.json')) {
+          return JSON.stringify({
+            dependencies: {
+              'react-native': '0.63.3',
+            },
+          });
         }
 
         return null;
@@ -1349,7 +1424,18 @@ describe('prepare', () => {
       it('throws for an invalid version file', async () => {
         const fromFile = 'invalidrc.json';
 
-        (fs.readFileSync as jest.Mock).mockReturnValue('not json');
+        (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
+          if (filePath.endsWith('package.json')) {
+            return JSON.stringify({
+              dependencies: {
+                'react-native': '0.63.3',
+              },
+            });
+          }
+
+          return 'not json';
+        });
+
         (fs.existsSync as jest.Mock).mockImplementation((filePath) => (
           filePath.endsWith(fromFile)
         ));
@@ -1361,5 +1447,27 @@ describe('prepare', () => {
         )).rejects.toThrow(`Could not parse ${fromFile}`);
       });
     });
+  });
+
+  it('skips if react-native is not a dependency', async () => {
+    (fs.readFileSync as jest.Mock).mockImplementation((filePath) => {
+      if (filePath.endsWith('package.json')) {
+        return JSON.stringify({
+          dependencies: {
+            react: '19',
+          },
+        });
+      }
+
+      throw new Error('File not found');
+    });
+
+    await prepare({}, createContext());
+
+    expect(plist.build).not.toHaveBeenCalled();
+    expect(buildConfig.patch).not.toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledWith(
+      'Skipping because the project does not have react-native as a dependency',
+    );
   });
 });
