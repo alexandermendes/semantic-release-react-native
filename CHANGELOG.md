@@ -1,3 +1,10 @@
+## [1.12.2](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.12.1...v1.12.2) (2025-02-12)
+
+
+### Bug Fixes
+
+* skip if react-native is not a dependency ([47bc761](https://github.com/alexandermendes/semantic-release-react-native/commit/47bc761f1ad02e78da2d25044a4f3f58a6e9a1b2))
+
 ## [1.12.1](https://github.com/alexandermendes/semantic-release-react-native/compare/v1.12.0...v1.12.1) (2024-11-30)
 
 
